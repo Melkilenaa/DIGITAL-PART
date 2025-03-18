@@ -1,0 +1,28 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start:build": "tsc --watch",
+    "start:run": "nodemon dist/server.js",
+    "start": "concurrently \"npm run start:build\" \"npm run start:run\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.5.0",
+    "@types/express": "^5.0.0",
+    "concurrently": "^9.1.2",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "json-server": "^1.0.0-beta.3",
+    "nodemon": "^3.1.9"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "typescript": "^5.8.2"
+  }
+}
