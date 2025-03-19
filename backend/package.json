@@ -12,7 +12,10 @@
     "seed": "ts-node src/seeders/main.seeder.ts",
   "seed:clean": "ts-node src/seeders/main.seeder.ts --clean",
   "seed:auth": "ts-node src/seeders/auth.seeder.ts",
-  "seed:auth:clean": "ts-node src/seeders/auth.seeder.ts "
+  "seed:user": "ts-node src/seeders/user.seeder.ts",
+  "seed:auth:clean": "ts-node src/seeders/auth.seeder.ts ",
+  "seed:user:clean": "ts-node src/seeders/user.seeder.ts --clean"
+
   },
   "keywords": [],
   "author": "",
