@@ -22,6 +22,8 @@ model User {
   updatedAt           DateTime          @updatedAt
   lastLogin           DateTime?
   pushNotificationToken String?
+  resetToken          String?
+  resetTokenExpiry    DateTime?
   customer            Customer?
   vendor              Vendor?
   driver              Driver?

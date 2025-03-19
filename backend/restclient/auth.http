@@ -1,0 +1,223 @@
+@baseUrl = http://localhost:3000/api/auth
+@contentType = application/json
+
+### Customer Registration
+POST {{baseUrl}}/register/customer
+Content-Type: {{contentType}}
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "customer@example.com",
+  "phone": "1234567890",
+  "password": "Password123!",
+  "profileImage": "https://example.com/profile.jpg"
+}
+
+### Vendor Registration
+POST {{baseUrl}}/register/vendor
+Content-Type: {{contentType}}
+
+{
+  "businessName": "AutoParts Plus",
+  "businessLogo": "https://example.com/logo.png",
+  "businessDescription": "High quality automotive parts for all brands",
+  "phoneNumber": "2345678901",
+  "email": "vendor@example.com",
+  "password": "Password123!",
+  "address": "123 Main Street",
+  "city": "Lagos",
+  "state": "Lagos State",
+  "country": "Nigeria",
+  "postalCode": "100001",
+  "latitude": 6.5244,
+  "longitude": 3.3792,
+  "operatingHours": {
+    "monday": { "open": "08:00", "close": "18:00" },
+    "tuesday": { "open": "08:00", "close": "18:00" },
+    "wednesday": { "open": "08:00", "close": "18:00" },
+    "thursday": { "open": "08:00", "close": "18:00" },
+    "friday": { "open": "08:00", "close": "18:00" },
+    "saturday": { "open": "09:00", "close": "15:00" },
+    "sunday": { "open": "closed", "close": "closed" }
+  },
+  "specializations": ["Engine Parts", "Brake Systems", "Electrical Components"],
+  "certifications": ["ISO Certified", "Automotive Service Excellence"]
+}
+
+### Driver Registration
+POST {{baseUrl}}/register/driver
+Content-Type: {{contentType}}
+
+{
+  "firstName": "Michael",
+  "lastName": "Johnson",
+  "phoneNumber": "3456789012",
+  "email": "driver@example.com",
+  "password": "Password123!",
+  "profileImage": "https://example.com/driver-profile.jpg",
+  "vehicleType": "Motorcycle",
+  "vehicleColor": "Black",
+  "licensePlate": "ABC123",
+  "drivingLicense": "DL12345678",
+  "insuranceDocument": "https://example.com/insurance.pdf",
+  "identificationDoc": "https://example.com/id.pdf"
+}
+
+### Login as Customer
+# @name loginCustomer
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "john@example.com",
+  "password": "Customer123!",
+  "deviceInfo": {
+    "token": "fcm-token-customer-device",
+    "device": "iPhone 13 Pro",
+    "platform": "iOS"
+  }
+}
+
+### Save customer tokens for subsequent requests
+@customerAccessToken = {{loginCustomer.response.body.data.accessToken}}
+@customerRefreshToken = {{loginCustomer.response.body.data.refreshToken}}
+
+### Login as Vendor
+# @name loginVendor
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "vendor@example.com",
+  "password": "Password123!",
+  "deviceInfo": {
+    "token": "fcm-token-vendor-device",
+    "device": "Samsung Galaxy S22",
+    "platform": "Android"
+  }
+}
+
+### Save vendor tokens
+@vendorAccessToken = {{loginVendor.response.body.data.accessToken}}
+@vendorRefreshToken = {{loginVendor.response.body.data.refreshToken}}
+
+### Login as Driver
+# @name loginDriver
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "driver@example.com",
+  "password": "Password123!",
+  "deviceInfo": {
+    "token": "fcm-token-driver-device",
+    "device": "Xiaomi Redmi Note",
+    "platform": "Android"
+  }
+}
+
+### Save driver tokens
+@driverAccessToken = {{loginDriver.response.body.data.accessToken}}
+@driverRefreshToken = {{loginDriver.response.body.data.refreshToken}}
+
+### Validate customer token
+POST {{baseUrl}}/validate-token
+Content-Type: {{contentType}}
+
+{
+  "token": "{{customerAccessToken}}"
+}
+
+### Refresh customer token
+POST {{baseUrl}}/refresh-token
+Content-Type: {{contentType}}
+
+{
+  "refreshToken": "{{customerRefreshToken}}"
+}
+
+### Request password reset
+POST {{baseUrl}}/password/reset-request
+Content-Type: {{contentType}}
+
+{
+  "emailOrPhone": "customer@example.com"
+}
+
+### Reset password (use token from previous response)
+POST {{baseUrl}}/password/reset
+Content-Type: {{contentType}}
+
+{
+  "token": "REPLACE_WITH_ACTUAL_RESET_TOKEN",
+  "newPassword": "NewPassword123!"
+}
+
+### Login with new password
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "customer@example.com",
+  "password": "NewPassword123!"
+}
+
+### Logout (specific device)
+POST {{baseUrl}}/logout
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerAccessToken}}
+
+{
+  "deviceToken": "fcm-token-customer-device"
+}
+
+### Logout (all devices) - no device token specified
+POST {{baseUrl}}/logout
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorAccessToken}}
+
+{}
+
+### Admin registration (requires existing admin access)
+# @name loginAdmin
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@example.com",
+  "password": "AdminPass123!"
+}
+
+@adminAccessToken = {{loginAdmin.response.body.data.accessToken}}
+
+### Create new admin (must be performed by existing super admin)
+POST {{baseUrl}}/register/admin
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminAccessToken}}
+
+{
+  "firstName": "New",
+  "lastName": "Admin",
+  "email": "newadmin@example.com",
+  "password": "AdminPass456!",
+  "permissionLevel": "STANDARD"
+}
+
+### Invalid login attempt
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "email": "nonexistent@example.com",
+  "password": "WrongPassword123"
+}
+
+### Login by phone instead of email
+POST {{baseUrl}}/login
+Content-Type: {{contentType}}
+
+{
+  "phone": "1234567890",
+  "password": "Password123!"
+}
