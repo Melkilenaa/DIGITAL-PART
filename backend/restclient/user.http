@@ -1,0 +1,226 @@
+@baseUrl = http://localhost:3000/api/users
+@contentType = application/json
+
+### Variables for tokens from auth.http
+@customerToken = REPLACE_WITH_CUSTOMER_TOKEN
+@vendorToken = REPLACE_WITH_VENDOR_TOKEN
+@driverToken = REPLACE_WITH_DRIVER_TOKEN
+@adminToken = REPLACE_WITH_ADMIN_TOKEN
+
+### ---------- PROFILE MANAGEMENT ---------- ###
+
+### Get user profile (customer)
+GET {{baseUrl}}/profile
+Authorization: Bearer {{customerToken}}
+
+### Get user profile (vendor)
+GET {{baseUrl}}/profile
+Authorization: Bearer {{vendorToken}}
+
+### Get user profile (driver)
+GET {{baseUrl}}/profile
+Authorization: Bearer {{driverToken}}
+
+### Update customer profile
+PUT {{baseUrl}}/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "firstName": "John Updated",
+  "lastName": "Doe Updated",
+  "profileImage": "https://example.com/updated-profile.jpg"
+}
+
+### Update vendor profile
+PUT {{baseUrl}}/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "businessName": "AutoParts Plus Updated",
+  "businessLogo": "https://example.com/updated-logo.png",
+  "businessDescription": "Updated high quality automotive parts for all brands",
+  "address": "123 Main Street Updated",
+  "city": "Lagos Updated",
+  "state": "Lagos State",
+  "country": "Nigeria",
+  "specializations": ["Engine Parts", "Brake Systems", "Electrical Components", "Suspension Parts"]
+}
+
+### Update driver profile
+PUT {{baseUrl}}/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "firstName": "Michael Updated",
+  "lastName": "Johnson Updated",
+  "profileImage": "https://example.com/updated-driver-profile.jpg",
+  "vehicleType": "Car",
+  "vehicleColor": "Blue Updated"
+}
+
+### ---------- ACCOUNT SETTINGS ---------- ###
+
+### Update account settings (change email)
+PUT {{baseUrl}}/account/settings
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "email": "updated-customer@example.com",
+  "notificationPreferences": {
+    "emailNotifications": true,
+    "pushNotifications": true,
+    "smsNotifications": false,
+    "marketingEmails": false
+  }
+}
+
+### Update account settings (change password)
+PUT {{baseUrl}}/account/settings
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "oldPassword": "Password123!",
+  "password": "NewPassword123!"
+}
+
+### ---------- DEVICE TOKEN MANAGEMENT ---------- ###
+
+### Register a device token
+POST {{baseUrl}}/device-tokens
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "token": "fcm-customer-device-token-123",
+  "device": "iPhone 13 Pro",
+  "platform": "iOS"
+}
+
+### Get user device tokens
+GET {{baseUrl}}/device-tokens
+Authorization: Bearer {{customerToken}}
+
+### Remove a device token
+DELETE {{baseUrl}}/device-tokens
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "token": "fcm-customer-device-token-123"
+}
+
+### ---------- VERIFICATION DOCUMENT SUBMISSION ---------- ###
+
+### Submit vendor verification documents
+POST {{baseUrl}}/verification/documents
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "type": "VENDOR",
+  "documents": [
+    {
+      "type": "BUSINESS_LICENSE",
+      "fileUrl": "https://example.com/documents/business-license.pdf",
+      "description": "Business operating license"
+    },
+    {
+      "type": "TAX_CERTIFICATE",
+      "fileUrl": "https://example.com/documents/tax-certificate.pdf",
+      "description": "Tax registration certificate"
+    }
+  ],
+  "additionalInfo": {
+    "businessRegistrationNumber": "REG12345",
+    "taxIdentificationNumber": "TIN67890"
+  }
+}
+
+### Submit driver verification documents
+POST {{baseUrl}}/verification/documents
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "type": "DRIVER",
+  "documents": [
+    {
+      "type": "DRIVING_LICENSE",
+      "fileUrl": "https://example.com/documents/driving-license.pdf"
+    },
+    {
+      "type": "INSURANCE",
+      "fileUrl": "https://example.com/documents/insurance.pdf"
+    },
+    {
+      "type": "IDENTIFICATION",
+      "fileUrl": "https://example.com/documents/id-card.pdf"
+    }
+  ]
+}
+
+### ---------- ADMIN FUNCTIONS ---------- ###
+
+### Get specific user profile (admin only)
+GET {{baseUrl}}/admin/users/USER_ID_HERE
+Authorization: Bearer {{adminToken}}
+
+### Update user permissions (admin only)
+PUT {{baseUrl}}/admin/users/USER_ID_HERE/permissions
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "targetUserId": "USER_ID_HERE",
+  "adminPermission": "STANDARD"
+}
+
+### Update user active status (admin only)
+PUT {{baseUrl}}/admin/users/USER_ID_HERE/status
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "targetUserId": "USER_ID_HERE",
+  "isActive": false
+}
+
+### Get user device tokens (admin only)
+GET {{baseUrl}}/admin/users/USER_ID_HERE/device-tokens
+Authorization: Bearer {{adminToken}}
+
+### Get users by role (admin only)
+GET {{baseUrl}}/admin/users/by-role/CUSTOMER
+Authorization: Bearer {{adminToken}}
+
+### Get pending verifications (admin only)
+GET {{baseUrl}}/admin/verification/pending?type=ALL
+Authorization: Bearer {{adminToken}}
+
+### Process verification decision (admin only - approve)
+POST {{baseUrl}}/admin/verification/decision
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "userId": "USER_ID_HERE",
+  "type": "VENDOR",
+  "isApproved": true
+}
+
+### Process verification decision (admin only - reject)
+POST {{baseUrl}}/admin/verification/decision
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "userId": "USER_ID_HERE",
+  "type": "DRIVER",
+  "isApproved": false,
+  "rejectionReason": "Documentation is incomplete. Please provide a clearer photo of your driver's license."
+}
