@@ -1,5 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// This is a schema.prisma file for Digital Autospareparts Market Place Services (DAMPS)
+// The schema covers all entities and relationships from the PRD
 
 generator client {
   provider = "prisma-client-js"
@@ -10,7 +10,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ENUMS
+// User management models
+model User {
+  id                  String            @id @default(uuid())
+  phone               String?           @unique
+  email               String?           @unique
+  password            String
+  role                UserRole
+  isActive            Boolean           @default(true)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  lastLogin           DateTime?
+  pushNotificationToken String?
+  customer            Customer?
+  vendor              Vendor?
+  driver              Driver?
+  admin               Admin?
+  notifications       Notification[]
+  messages            Message[]         @relation("UserMessages")
+  messagesSent        Message[]         @relation("SentMessages")
+  deviceTokens        DeviceToken[]
+  
+  @@index([email, phone])
+}
+
 enum UserRole {
   CUSTOMER
   VENDOR
@@ -18,38 +41,609 @@ enum UserRole {
   ADMIN
 }
 
-enum OrderStatus {
-  RECEIVED       // Order received but not processed
-  PROCESSING     // Order being processed by vendor
-  PREPARING      // Parts being packaged
-  READY_FOR_PICKUP // Ready for delivery or collection
-  IN_TRANSIT     // Order on the way to customer
-  DELIVERED      // Successfully delivered
-  COLLECTED      // Successfully collected by customer
-  CANCELLED      // Order cancelled
-  RETURNED       // Order returned
+model DeviceToken {
+  id          String   @id @default(uuid())
+  token       String   @unique
+  device      String?
+  platform    String?
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }
 
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-  PARTIALLY_REFUNDED
+// Customer related models
+model Customer {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName         String
+  lastName          String
+  profileImage      String?
+  addresses         Address[]
+  vehicles          Vehicle[]
+  orders            Order[]
+  wishlistItems     WishlistItem[]
+  reviews           Review[]
+  recentlyViewed    RecentlyViewed[]
+  paymentMethods    PaymentMethod[]
+  
+  @@index([userId])
 }
 
-enum PaymentMethod {
-  CREDIT_CARD
-  DEBIT_CARD
+model Address {
+  id                String            @id @default(uuid())
+  customerId        String
+  customer          Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  name              String            // e.g., "Home", "Work"
+  street            String
+  city              String
+  state             String
+  country           String
+  postalCode        String
+  latitude          Float?
+  longitude         Float?
+  isDefault         Boolean           @default(false)
+  phoneNumber       String?
+  additionalInfo    String?
+  orders            Order[]
+
+  @@index([customerId])
+}
+
+model Vehicle {
+  id                String            @id @default(uuid())
+  customerId        String
+  customer          Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  make              String
+  model             String
+  year              Int
+  vin               String?
+  licensePlate      String?
+  engineType        String?
+  transmissionType  String?
+  additionalDetails Json?
+  isDefault         Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([customerId])
+  @@index([make, model, year])
+}
+
+model WishlistItem {
+  id                String            @id @default(uuid())
+  customerId        String
+  customer          Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  partId            String
+  part              Part              @relation(fields: [partId], references: [id], onDelete: Cascade)
+  addedAt           DateTime          @default(now())
+
+  @@unique([customerId, partId])
+  @@index([customerId])
+  @@index([partId])
+}
+
+model RecentlyViewed {
+  id                String            @id @default(uuid())
+  customerId        String
+  customer          Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  partId            String
+  part              Part              @relation(fields: [partId], references: [id], onDelete: Cascade)
+  viewedAt          DateTime          @default(now())
+
+  @@unique([customerId, partId])
+  @@index([customerId])
+  @@index([partId])
+  @@index([viewedAt])
+}
+
+model PaymentMethod {
+  id                String            @id @default(uuid())
+  customerId        String
+  customer          Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  type              PaymentType
+  provider          String            // e.g., "Visa", "Mastercard", "Bank"
+  lastFourDigits    String?           // For cards
+  expiryDate        String?           // For cards
+  accountName       String?           // For bank accounts
+  tokenizedDetails  String?           // Securely stored payment token from Flutterwave
+  isDefault         Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([customerId])
+}
+
+enum PaymentType {
+  CARD
   BANK_TRANSFER
   CASH_ON_DELIVERY
-  WALLET
+  MOBILE_MONEY
+}
+
+// Vendor related models
+model Vendor {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName      String
+  businessLogo      String?
+  businessDescription String?
+  phoneNumber       String
+  email             String?
+  address           String
+  city              String
+  state             String
+  country           String
+  postalCode        String?
+  latitude          Float?
+  longitude         Float?
+  operatingHours    Json              // Store as JSON with day and hours
+  specialHolidays   Json?             // Store as JSON with date and status
+  isVerified        Boolean           @default(false)
+  verificationDocuments Json?         // Store document URLs as JSON
+  commissionRate    Float             @default(5.0)  // Default 5% commission
+  rating            Float             @default(0)
+  totalRatings      Int               @default(0)
+  specializations   String[]          // Array of specializations
+  certifications    String[]          // Array of certifications
+  tags              String[]          // Array of tags for search
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  parts             Part[]
+  orders            Order[]           // Orders handled by this vendor
+  promotions        Promotion[]
+  reviews           Review[]
+
+  @@index([userId])
+  @@index([businessName])
+  @@index([city, state])
+  @@index([isVerified])
+  @@index([rating])
+}
+
+// Driver related models
+model Driver {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName         String
+  lastName          String
+  phoneNumber       String
+  profileImage      String?
+  vehicleType       String
+  vehicleColor      String?
+  licensePlate      String
+  drivingLicense    String
+  insuranceDocument String?
+  identificationDoc String
+  isVerified        Boolean           @default(false)
+  isAvailable       Boolean           @default(false)
+  latitude          Float?
+  longitude         Float?
+  rating            Float             @default(0)
+  totalRatings      Int               @default(0)
+  serviceAreas      Json?             // Store service area details as JSON
+  workingHours      Json?             // Store working hours as JSON
+  maxPackageSize    String?
+  maxPackageWeight  Float?            // in kg
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deliveries        Delivery[]
+  earnings          DriverEarning[]
+
+  @@index([userId])
+  @@index([isVerified, isAvailable])
+  @@index([rating])
+}
+
+model DriverEarning {
+  id                String            @id @default(uuid())
+  driverId          String
+  driver            Driver            @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  deliveryId        String            @unique
+  delivery          Delivery          @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  amount            Float
+  transactionFee    Float             @default(0)
+  netAmount         Float
+  isPaid            Boolean           @default(false)
+  earningDate       DateTime          @default(now())
+  paidDate          DateTime?
+  transactionRef    String?
+  
+  @@index([driverId])
+  @@index([isPaid])
+  @@index([earningDate])
+}
+
+// Admin related models
+model Admin {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName         String
+  lastName          String
+  permissionLevel   AdminPermission   @default(STANDARD)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  systemConfigs     SystemConfig[]
+  
+  @@index([userId])
+}
+
+enum AdminPermission {
+  STANDARD
+  ELEVATED
+  SUPER_ADMIN
+}
+
+model SystemConfig {
+  id                String            @id @default(uuid())
+  key               String            @unique
+  value             String
+  description       String?
+  adminId           String?           // Who last modified this config
+  admin             Admin?            @relation(fields: [adminId], references: [id], onDelete: SetNull)
+  updatedAt         DateTime          @updatedAt
+}
+
+// Product related models
+model Category {
+  id                String            @id @default(uuid())
+  name              String            @unique
+  description       String?
+  image             String?
+  parentId          String?           // For subcategories
+  parent            Category?         @relation("SubCategories", fields: [parentId], references: [id])
+  children          Category[]        @relation("SubCategories")
+  parts             Part[]
+  commissionRate    Float?            // Optional override of system default
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([parentId])
+}
+
+model Part {
+  id                String            @id @default(uuid())
+  name              String
+  description       String?
+  partNumber        String?
+  barcode           String?           // For barcode scanning
+  price             Float
+  discountedPrice   Float?
+  condition         PartCondition     @default(NEW)
+  brand             String?
+  images            String[]          // Array of image URLs
+  stockQuantity     Int               @default(0)
+  lowStockAlert     Int               @default(5)
+  specifications    Json?             // Store part specs as JSON
+  compatibleVehicles Json?            // Store compatibility as JSON
+  weight            Float?            // in kg
+  dimensions        String?           // Format: "LxWxH" in cm
+  categoryId        String
+  category          Category          @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  vendorId          String
+  vendor            Vendor            @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  tags              String[]          // Array of tags for search
+  isActive          Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  orderItems        OrderItem[]
+  wishlistItems     WishlistItem[]
+  recentlyViewed    RecentlyViewed[]
+  promotions        PartPromotion[]
+
+  @@index([name])
+  @@index([partNumber])
+  @@index([barcode])
+  @@index([categoryId])
+  @@index([vendorId])
+  @@index([condition])
+  @@index([isActive])
+  @@index([tags])
 }
 
 enum PartCondition {
   NEW
   USED
   REFURBISHED
+  AFTERMARKET
+  OEM
+}
+
+// Order related models
+model Order {
+  id                String            @id @default(uuid())
+  orderNumber       String            @unique
+  customerId        String
+  customer          Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  vendorId          String
+  vendor            Vendor            @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  items             OrderItem[]
+  subtotal          Float
+  deliveryFee       Float             @default(0)
+  tax               Float             @default(0)
+  discount          Float             @default(0)
+  total             Float
+  paymentMethod     PaymentType
+  paymentStatus     PaymentStatus     @default(PENDING)
+  paymentReference  String?
+  orderStatus       OrderStatus       @default(RECEIVED)
+  orderType         OrderType         @default(DELIVERY)
+  addressId         String?
+  address           Address?          @relation(fields: [addressId], references: [id])
+  notes             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  cancellationReason String?
+  isCancelled       Boolean           @default(false)
+  delivery          Delivery?
+  refunds           Refund[]
+  transactionFee    Float             @default(0)
+  commissionAmount  Float             @default(0)
+  vendorEarning     Float             @default(0)
+  
+  @@index([customerId])
+  @@index([vendorId])
+  @@index([orderStatus])
+  @@index([paymentStatus])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id                String            @id @default(uuid())
+  orderId           String
+  order             Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  partId            String
+  part              Part              @relation(fields: [partId], references: [id], onDelete: Restrict)
+  quantity          Int
+  unitPrice         Float
+  subtotal          Float
+  notes             String?
+  
+  @@index([orderId])
+  @@index([partId])
+}
+
+enum OrderStatus {
+  RECEIVED
+  PROCESSING
+  PREPARING
+  READY_FOR_PICKUP
+  IN_TRANSIT
+  DELIVERED
+  COLLECTED
+  CANCELLED
+  RETURNED
+  DISPUTED
+}
+
+enum OrderType {
+  DELIVERY
+  COLLECTION
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+model Delivery {
+  id                String            @id @default(uuid())
+  orderId           String            @unique
+  order             Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  driverId          String?
+  driver            Driver?           @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  status            DeliveryStatus    @default(PENDING)
+  pickupTime        DateTime?
+  deliveredTime     DateTime?
+  estimatedDeliveryTime DateTime?
+  startLatitude     Float?
+  startLongitude    Float?
+  destinationLatitude Float?
+  destinationLongitude Float?
+  currentLatitude   Float?
+  currentLongitude  Float?
+  distance          Float?            // in km
+  deliveryFee       Float
+  driverInstructions String?
+  deliveryProof     String?           // URL to image or signature
+  rating            Int?
+  reviewComment     String?
+  driverEarning     DriverEarning?
+  
+  @@index([orderId])
+  @@index([driverId])
+  @@index([status])
+}
+
+enum DeliveryStatus {
+  PENDING
+  ASSIGNED
+  PICKUP_IN_PROGRESS
+  PICKED_UP
+  IN_TRANSIT
+  ARRIVED
+  DELIVERED
+  FAILED
+  CANCELLED
+}
+
+// Review system
+model Review {
+  id                String            @id @default(uuid())
+  customerId        String
+  customer          Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  vendorId          String
+  vendor            Vendor            @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  rating            Int               // 1-5 star rating
+  comment           String?
+  images            String[]          // URLs to review images
+  isVerifiedPurchase Boolean          @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  isHidden          Boolean           @default(false) // For admin moderation
+  
+  @@index([customerId])
+  @@index([vendorId])
+  @@index([rating])
+  @@index([createdAt])
+}
+
+// Promotions and marketing
+model Promotion {
+  id                String            @id @default(uuid())
+  vendorId          String
+  vendor            Vendor            @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  name              String
+  description       String?
+  type              PromotionType
+  discountValue     Float             // Percentage or fixed amount
+  isPercentage      Boolean           @default(true)
+  minimumOrderValue Float?
+  startDate         DateTime
+  endDate           DateTime
+  isActive          Boolean           @default(true)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  promotionCode     String?           @unique
+  parts             PartPromotion[]
+  
+  @@index([vendorId])
+  @@index([isActive])
+  @@index([startDate, endDate])
+  @@index([promotionCode])
+}
+
+model PartPromotion {
+  id                String            @id @default(uuid())
+  promotionId       String
+  promotion         Promotion         @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  partId            String
+  part              Part              @relation(fields: [partId], references: [id], onDelete: Cascade)
+  
+  @@unique([promotionId, partId])
+  @@index([promotionId])
+  @@index([partId])
+}
+
+enum PromotionType {
+  DISCOUNT
+  BUNDLE
+  SPECIAL_OFFER
+  CLEARANCE
+  LOYALTY
+  FEATURED
+}
+
+// Transaction models
+model Transaction {
+  id                String            @id @default(uuid())
+  reference         String            @unique
+  type              TransactionType
+  amount            Float
+  fee               Float             @default(0)
+  status            TransactionStatus @default(PENDING)
+  paymentMethod     PaymentType
+  gatewayReference  String?           // Reference from payment gateway
+  currency          String            @default("NGN")
+  metadata          Json?
+  orderId           String?
+  customerId        String?
+  vendorId          String?
+  driverId          String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  refunds           Refund[]
+  
+  @@index([reference])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum TransactionType {
+  PAYMENT
+  REFUND
+  PAYOUT
+  ADJUSTMENT
+  COMMISSION
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+  CANCELLED
+}
+
+model Refund {
+  id                String            @id @default(uuid())
+  orderId           String
+  order             Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  transactionId     String
+  transaction       Transaction       @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  amount            Float
+  reason            String
+  status            RefundStatus      @default(PENDING)
+  approvedById      String?           // Admin who approved refund
+  processedAt       DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([orderId])
+  @@index([transactionId])
+  @@index([status])
+}
+
+enum RefundStatus {
+  PENDING
+  APPROVED
+  PROCESSED
+  REJECTED
+}
+
+// Communication models
+model Message {
+  id                String            @id @default(uuid())
+  senderId          String
+  sender            User              @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId        String
+  receiver          User              @relation("UserMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content           String
+  isRead            Boolean           @default(false)
+  attachments       String[]          // URLs to attachments
+  sentAt            DateTime          @default(now())
+  readAt            DateTime?
+  
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([sentAt])
+}
+
+model Notification {
+  id                String            @id @default(uuid())
+  userId            String
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              NotificationType
+  title             String
+  message           String
+  data              Json?             // Additional data related to notification
+  isRead            Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  readAt            DateTime?
+  
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([isRead])
 }
 
 enum NotificationType {
@@ -57,647 +651,52 @@ enum NotificationType {
   PAYMENT
   PROMOTION
   SYSTEM
-  MESSAGE
-  REMINDER
+  DELIVERY
+  INVENTORY
+  PRICE_DROP
+  REVIEW
 }
 
-// Base User model
-model User {
-  id             String      @id @default(uuid())
-  email          String?     @unique
-  phone          String      @unique
-  passwordHash   String
-  role           UserRole
-  isVerified     Boolean     @default(false)
-  isActive       Boolean     @default(true)
-  lastLogin      DateTime?
-  deviceToken    String?     // For push notifications
+// Analytics and reporting
+model Analytics {
+  id                String            @id @default(uuid())
+  type              AnalyticsType
+  data              Json
+  period            String            // "daily", "weekly", "monthly"
+  periodStart       DateTime
+  periodEnd         DateTime
+  createdAt         DateTime          @default(now())
   
-  // Relations based on role
-  customer       Customer?
-  vendor         Vendor?
-  driver         Driver?
-  admin          Admin?
-  
-  // Common relations
-  notifications  Notification[]
-  sentMessages   Message[]    @relation("SentMessages")
-  receivedMessages Message[]  @relation("ReceivedMessages")
-  
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-
-  @@index([email])
-  @@index([phone])
-  @@index([role])
-}
-
-model Customer {
-  id               String      @id @default(uuid())
-  userId           String      @unique
-  firstName        String
-  lastName         String
-  profileImage     String?
-  
-  // Relations
-  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  vehicles         Vehicle[]
-  addresses        Address[]
-  orders           Order[]
-  reviews          Review[]
-  wishlist         WishlistItem[]
-  recentlyViewed   RecentlyViewed[]
-  cart             CartItem[]
-  paymentMethods   SavedPaymentMethod[]
-  
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
-}
-
-model Vendor {
-  id                String      @id @default(uuid())
-  userId            String      @unique
-  businessName      String
-  description       String?     @db.Text
-  logo              String?
-  coverImage        String?
-  businessAddress   String
-  location          Json        // {latitude, longitude}
-  contactEmail      String
-  contactPhone      String
-  operatingHours    Json        // {days: [{day: "Monday", open: "09:00", close: "17:00"}]}
-  isVerified        Boolean     @default(false)
-  specializations   String[]
-  certifications    String[]
-  averageRating     Float       @default(0)
-  totalRatings      Int         @default(0)
-  bankInfo          Json?       // For payments
-  
-  // Relations
-  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  inventory         Part[]
-  receivedOrders    Order[]
-  reviews           Review[]
-  promotions        Promotion[]
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-
-  @@index([businessName])
-  @@index([isVerified])
-}
-
-model Driver {
-  id                String      @id @default(uuid())
-  userId            String      @unique
-  firstName         String
-  lastName          String
-  profileImage      String?
-  vehicleType       String
-  licensePlate      String
-  color             String
-  licenseNumber     String
-  licenseImage      String
-  idNumber          String
-  idImage           String
-  isVerified        Boolean     @default(false)
-  isAvailable       Boolean     @default(false)
-  currentLocation   Json?       // {latitude, longitude}
-  serviceArea       Json?       // {radius, centerLat, centerLng}
-  averageRating     Float       @default(0)
-  totalRatings      Int         @default(0)
-  bankInfo          Json?       // For payments
-  
-  // Relations
-  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deliveries        Delivery[]
-  workingHours      WorkingHour[]
-  earnings          Earning[]
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-
-  @@index([isVerified])
-  @@index([isAvailable])
-}
-
-model Admin {
-  id                String      @id @default(uuid())
-  userId            String      @unique
-  firstName         String
-  lastName          String
-  permissions       Json        // {orders: true, users: true, settings: false, ...}
-  
-  // Relations
-  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-}
-
-model Vehicle {
-  id                String      @id @default(uuid())
-  customerId        String
-  make              String
-  model             String
-  year              Int
-  vin               String?
-  licensePlate      String?
-  additionalDetails Json?       // Any other vehicle info
-  
-  // Relations
-  customer          Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@index([make, model, year])
-  @@index([customerId])
-}
-
-model Category {
-  id                String      @id @default(uuid())
-  name              String      
-  description       String?
-  image             String?
-  isActive          Boolean     @default(true)
-  
-  // Relations
-  parentCategory    Category?   @relation("SubCategories", fields: [parentId], references: [id])
-  parentId          String?
-  subCategories     Category[]  @relation("SubCategories")
-  parts             Part[]
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-
-  @@unique([name, parentId]) // Allow same name in different parent categories
-  @@index([parentId])
-}
-
-model Part {
-  id                String        @id @default(uuid())
-  vendorId          String
-  categoryId        String
-  name              String
-  description       String?       @db.Text
-  price             Float
-  salePrice         Float?
-  condition         PartCondition @default(NEW)
-  brand             String?
-  partNumber        String?
-  quantity          Int           @default(0)
-  images            String[]      // Array of image URLs
-  specifications    Json?         // Detailed specs as JSON
-  weight            Float?
-  dimensions        Json?         // {length, width, height, unit}
-  compatibleVehicles Json?        // [{make, model, yearStart, yearEnd}]
-  isActive          Boolean       @default(true)
-  averageRating     Float         @default(0)
-  totalRatings      Int           @default(0)
-  
-  // Relations
-  vendor            Vendor        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  category          Category      @relation(fields: [categoryId], references: [id])
-  orderItems        OrderItem[]
-  reviews           Review[]
-  wishlistItems     WishlistItem[]
-  cartItems         CartItem[]
-  recentlyViewed    RecentlyViewed[]
-  
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  
-  @@index([vendorId])
-  @@index([categoryId])
-  @@index([name])
-  @@index([partNumber])
-  @@index([isActive])
-}
-
-model Order {
-  id                String      @id @default(uuid())
-  customerId        String
-  vendorId          String
-  orderNumber       String      @unique
-  status            OrderStatus @default(RECEIVED)
-  subtotal          Float
-  deliveryCharge    Float?
-  tax               Float
-  discount          Float       @default(0)
-  total             Float
-  notes             String?     @db.Text
-  isDelivery        Boolean     @default(true)  // true = delivery, false = collection
-  estimatedDelivery DateTime?   // Estimated delivery date/time
-  
-  // Relations
-  customer          Customer    @relation(fields: [customerId], references: [id])
-  vendor            Vendor      @relation(fields: [vendorId], references: [id])
-  items             OrderItem[]
-  payment           Payment?
-  delivery          Delivery?
-  statusUpdates     StatusUpdate[]
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@index([customerId])
-  @@index([vendorId])
-  @@index([status])
-  @@index([orderNumber])
-}
-
-model OrderItem {
-  id                String      @id @default(uuid())
-  orderId           String
-  partId            String
-  quantity          Int
-  unitPrice         Float
-  subtotal          Float
-  
-  // Relations
-  order             Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  part              Part        @relation(fields: [partId], references: [id])
-  
-  @@index([orderId])
-  @@index([partId])
-}
-
-model StatusUpdate {
-  id                String      @id @default(uuid())
-  orderId           String
-  status            OrderStatus
-  description       String      @db.Text
-  
-  // Relations
-  order             Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime    @default(now())
-  
-  @@index([orderId])
-}
-
-model Payment {
-  id                String        @id @default(uuid())
-  orderId           String        @unique
-  amount            Float
-  status            PaymentStatus @default(PENDING)
-  method            PaymentMethod
-  transactionId     String?
-  paymentDetails    Json?         // Gateway specific details
-  receipt           String?       // Receipt URL or identifier
-  
-  // Relations
-  order             Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  
-  @@index([orderId])
-  @@index([transactionId])
-  @@index([status])
-}
-
-model SavedPaymentMethod {
-  id                String        @id @default(uuid())
-  customerId        String
-  type              PaymentMethod
-  isDefault         Boolean       @default(false)
-  lastFour          String?       // Last 4 digits of card
-  expiryDate        String?       // MM/YY format for cards
-  cardType          String?       // Visa, Mastercard, etc.
-  accountName       String?       // For bank accounts
-  tokenizedData     String        // Encrypted payment details
-  
-  // Relations
-  customer          Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
-  
-  @@index([customerId])
-}
-
-model Delivery {
-  id                String      @id @default(uuid())
-  orderId           String      @unique
-  driverId          String?
-  addressId         String
-  status            String      // ASSIGNED, PICKED_UP, IN_TRANSIT, DELIVERED, FAILED
-  pickupTime        DateTime?
-  deliveryTime      DateTime?
-  estimatedArrival  DateTime?
-  actualArrival     DateTime?
-  notes             String?     @db.Text
-  proofOfDelivery   String?     // Image URL or signature
-  
-  // Relations
-  order             Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  driver            Driver?     @relation(fields: [driverId], references: [id])
-  address           Address     @relation(fields: [addressId], references: [id])
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@index([orderId])
-  @@index([driverId])
-  @@index([status])
-}
-
-model Address {
-  id                String      @id @default(uuid())
-  customerId        String
-  label             String      // e.g., "Home", "Work"
-  fullName          String
-  phoneNumber       String
-  street            String
-  city              String
-  state             String
-  postalCode        String
-  country           String
-  isDefault         Boolean     @default(false)
-  location          Json?       // {latitude, longitude}
-  
-  // Relations
-  customer          Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  deliveries        Delivery[]
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@index([customerId])
-}
-
-model Review {
-  id                String      @id @default(uuid())
-  customerId        String
-  vendorId          String?
-  partId            String?
-  orderId           String?     // Optional link to order
-  rating            Int         // 1-5 stars
-  comment           String?     @db.Text
-  images            String[]    // Array of image URLs
-  
-  // Relations
-  customer          Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  vendor            Vendor?     @relation(fields: [vendorId], references: [id], onDelete: SetNull)
-  part              Part?       @relation(fields: [partId], references: [id], onDelete: SetNull)
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@index([customerId])
-  @@index([vendorId])
-  @@index([partId])
-  @@index([orderId])
-}
-
-model Notification {
-  id                String           @id @default(uuid())
-  userId            String
-  type              NotificationType
-  title             String
-  message           String
-  image             String?
-  isRead            Boolean          @default(false)
-  data              Json?            // Additional data like orderId, etc.
-  
-  // Relations
-  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime         @default(now())
-  
-  @@index([userId])
   @@index([type])
-  @@index([isRead])
+  @@index([period])
+  @@index([periodStart, periodEnd])
 }
 
-model Message {
-  id                String      @id @default(uuid())
-  senderId          String
-  receiverId        String
-  content           String      @db.Text
-  isRead            Boolean     @default(false)
-  attachments       String[]    // URLs to any attached files
-  
-  // Relations
-  sender            User        @relation("SentMessages", fields: [senderId], references: [id])
-  receiver          User        @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  
-  createdAt         DateTime    @default(now())
-  
-  @@index([senderId])
-  @@index([receiverId])
-  @@index([isRead])
+enum AnalyticsType {
+  SALES
+  ORDERS
+  USERS
+  INVENTORY
+  DELIVERIES
+  REVENUE
+  PARTS_POPULARITY
+  CATEGORY_PERFORMANCE
 }
 
-model WishlistItem {
-  id                String      @id @default(uuid())
-  customerId        String
-  partId            String
-  
-  // Relations
-  customer          Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  part              Part        @relation(fields: [partId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime    @default(now())
-  
-  @@unique([customerId, partId]) // Prevent duplicates
-  @@index([customerId])
-  @@index([partId])
-}
-
-model RecentlyViewed {
-  id                String      @id @default(uuid())
-  customerId        String
-  partId            String
-  
-  // Relations
-  customer          Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  part              Part        @relation(fields: [partId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime    @default(now())
-  
-  @@unique([customerId, partId]) // Keep most recent view only
-  @@index([customerId])
-  @@index([partId])
-}
-
-model CartItem {
-  id                String      @id @default(uuid())
-  customerId        String
-  partId            String
-  quantity          Int         @default(1)
-  
-  // Relations
-  customer          Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  part              Part        @relation(fields: [partId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@unique([customerId, partId]) // Prevent duplicates, update quantity instead
-  @@index([customerId])
-  @@index([partId])
-}
-
-model Promotion {
-  id                String      @id @default(uuid())
-  vendorId          String
-  title             String
-  description       String      @db.Text
-  discountType      String      // PERCENTAGE, FIXED_AMOUNT
-  discountValue     Float       // Value of discount (percentage or amount)
-  startDate         DateTime
-  endDate           DateTime
-  minimumPurchase   Float?      // Minimum order value to apply promotion
-  applicableParts   String[]    // Array of part IDs or empty for all
-  isActive          Boolean     @default(true)
-  promoCode         String?     @unique // Optional promo code for manual application
-  image             String?     // Promotional image
-  
-  // Relations
-  vendor            Vendor      @relation(fields: [vendorId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@index([vendorId])
-  @@index([isActive])
-  @@index([startDate, endDate])
-  @@index([promoCode])
-}
-
-model WorkingHour {
-  id                String      @id @default(uuid())
-  driverId          String
-  dayOfWeek         Int         // 0-6 (Sunday-Saturday)
-  startTime         String      // Format: "HH:MM" 24-hour
-  endTime           String      // Format: "HH:MM" 24-hour
-  isActive          Boolean     @default(true)
-  
-  // Relations
-  driver            Driver      @relation(fields: [driverId], references: [id], onDelete: Cascade)
-  
-  @@unique([driverId, dayOfWeek]) // One entry per day per driver
-  @@index([driverId])
-}
-
-model Earning {
-  id                String      @id @default(uuid())
-  driverId          String
-  orderId           String?     // Can be null for bonuses/incentives
-  amount            Float
-  type              String      // DELIVERY_FEE, TIP, BONUS, etc.
-  status            String      // PENDING, PAID
-  payoutBatchId     String?     // For grouping multiple earnings in one payout
-  description       String?
-  
-  // Relations
-  driver            Driver      @relation(fields: [driverId], references: [id], onDelete: Cascade)
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@index([driverId])
-  @@index([orderId])
-  @@index([status])
-  @@index([payoutBatchId])
-}
-
-model DriverPayout {
-  id                String      @id @default(uuid())
-  batchId           String      @unique  // For grouping multiple earnings
-  totalAmount       Float
-  driverCount       Int         // Number of drivers in this payout
-  status            String      // PROCESSING, COMPLETED, FAILED
-  paymentDetails    Json?       // Details of bank transfer or other payment method
-  notes             String?     @db.Text
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@index([status])
-}
-
-model SystemConfig {
-  id                String      @id @default(uuid())
-  key               String      @unique
-  value             String      @db.Text
-  description       String?     @db.Text
-  isPublic          Boolean     @default(false) // Whether visible to frontend
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-}
-
-model AuditLog {
-  id                String      @id @default(uuid())
-  userId            String?     // Can be null for system actions
+// System logs
+model SystemLog {
+  id                String            @id @default(uuid())
   action            String
-  entityType        String      // User, Order, Part, etc.
-  entityId          String?
-  oldValues         Json?       // Previous state
-  newValues         Json?       // New state
+  entityType        String?           // What type of entity was affected
+  entityId          String?           // ID of the entity affected
+  performedById     String?           // User who performed the action
+  details           Json?
   ipAddress         String?
-  userAgent         String?     @db.Text
+  userAgent         String?
+  createdAt         DateTime          @default(now())
   
-  createdAt         DateTime    @default(now())
-  
-  @@index([userId])
-  @@index([entityType, entityId])
   @@index([action])
-}
-
-model SupportTicket {
-  id                String      @id @default(uuid())
-  userId            String
-  type              String      // ACCOUNT, ORDER, PAYMENT, TECHNICAL, OTHER
-  subject           String
-  description       String      @db.Text
-  status            String      // OPEN, IN_PROGRESS, RESOLVED, CLOSED
-  priority          String      // LOW, MEDIUM, HIGH, URGENT
-  attachments       String[]    // Array of attachment URLs
-  assignedTo        String?     // Admin user ID
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@index([userId])
-  @@index([status])
-  @@index([priority])
-  @@index([assignedTo])
-}
-
-model VerificationRequest {
-  id                String      @id @default(uuid())
-  userId            String
-  type              String      // EMAIL, PHONE, IDENTITY, BUSINESS
-  token             String      // Verification token or code
-  expires           DateTime
-  completed         Boolean     @default(false)
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@index([userId])
-  @@index([token])
-  @@index([completed])
-}
-
-// For part compatibility verification
-model VehicleCompatibility {
-  id                String      @id @default(uuid())
-  make              String
-  model             String
-  yearStart         Int
-  yearEnd           Int
-  engineTypes       String[]    // Array of compatible engine types
-  notes             String?     @db.Text
-  
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  @@unique([make, model, yearStart, yearEnd])
-  @@index([make, model])
+  @@index([entityType, entityId])
+  @@index([performedById])
+  @@index([createdAt])
 }
