@@ -1,0 +1,91 @@
+@baseUrl = http://localhost:3000/api
+@contentType = application/json
+
+### Variables for tokens (replace with actual tokens after login)
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlYjhjZTE0ZS0wZmZhLTQzZTMtYTc4Ny1lZTllOThkZGZjNDkiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiJjYzcxYzUzYS05ZWI0LTRjMzEtOTU4MS05ODljZjJhMjNkMTMiLCJpYXQiOjE3NDI1MTYwNzksImV4cCI6MTc0MjUxOTY3OX0.fYH2UncST2_7y5kDPOdLCkVluxkE8rabKHOL7Tt2LAY
+@vendorToken = REPLACE_WITH_VENDOR_TOKEN
+@driverToken = REPLACE_WITH_DRIVER_TOKEN
+@adminToken = REPLACE_WITH_ADMIN_TOKEN
+
+### Get all addresses for the authenticated customer
+GET {{baseUrl}}/addresses
+Authorization: Bearer {{customerToken}}
+
+### Get the default address
+GET {{baseUrl}}/addresses/default
+Authorization: Bearer {{customerToken}}
+
+### Create a new address
+POST {{baseUrl}}/addresses
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "name": "Home",
+  "street": "123 Main Street",
+  "city": "Lagos",
+  "state": "Lagos State",
+  "country": "Nigeria",
+  "postalCode": "100001",
+  "phoneNumber": "+2347012345678",
+  "additionalInfo": "Near the shopping mall",
+  "isDefault": true
+}
+
+### Get a specific address by ID
+# Replace :addressId with an actual ID
+GET {{baseUrl}}/addresses/8cd2626a-fd7b-4315-b2b3-83035f6ff0cd
+Authorization: Bearer {{customerToken}}
+
+### Update an address
+# Replace :addressId with an actual ID
+PUT {{baseUrl}}/addresses/fa432aa2-a844-4e69-a050-ec0b52ee8fce
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "name": "Office",
+  "street": "456 Business Avenue",
+  "city": "Lagos",
+  "state": "Lagos State",
+  "country": "Nigeria",
+  "postalCode": "100002",
+  "phoneNumber": "+2347087654321",
+  "additionalInfo": "5th floor, Suite 501"
+}
+
+### Set an address as default
+# Replace :addressId with an actual ID
+PUT {{baseUrl}}/addresses/:addressId/default
+Authorization: Bearer {{customerToken}}
+
+### Delete an address
+# Replace :addressId with an actual ID
+DELETE {{baseUrl}}/addresses/:addressId
+Authorization: Bearer {{customerToken}}
+
+### Validate coordinates for an address
+POST {{baseUrl}}/addresses/validate-coordinates
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "city": "Lagos",
+  "state": "Lagos State",
+  "country": "Nigeria"
+}
+
+### Attempt to access with a vendor token (should fail with 403)
+GET {{baseUrl}}/addresses
+Authorization: Bearer {{vendorToken}}
+
+### Attempt to access with a driver token (should fail with 403)
+GET {{baseUrl}}/addresses
+Authorization: Bearer {{driverToken}}
+
+### Attempt to access with an admin token (should fail with 403)
+GET {{baseUrl}}/addresses
+Authorization: Bearer {{adminToken}}
+
+### Attempt to access without token (should fail with 401)
+GET {{baseUrl}}/addresses

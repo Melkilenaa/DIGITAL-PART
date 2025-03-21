@@ -1,0 +1,120 @@
+@baseUrl = http://localhost:3000/api
+@contentType = application/json
+
+### Variables for tokens (replace with actual tokens after login)
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlYjhjZTE0ZS0wZmZhLTQzZTMtYTc4Ny1lZTllOThkZGZjNDkiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiJjYzcxYzUzYS05ZWI0LTRjMzEtOTU4MS05ODljZjJhMjNkMTMiLCJpYXQiOjE3NDI1MTYwNzksImV4cCI6MTc0MjUxOTY3OX0.fYH2UncST2_7y5kDPOdLCkVluxkE8rabKHOL7Tt2LAY
+@vendorToken = REPLACE_WITH_VENDOR_TOKEN
+@driverToken = REPLACE_WITH_DRIVER_TOKEN
+@adminToken = REPLACE_WITH_ADMIN_TOKEN
+
+### PROFILE MANAGEMENT ###
+
+### Get customer profile
+GET {{baseUrl}}/customers/profile
+Authorization: Bearer {{customerToken}}
+
+### Update customer profile
+PUT {{baseUrl}}/customers/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "profileImage": "https://example.com/profile-images/johndoe.jpg"
+}
+
+### ORDER MANAGEMENT ###
+
+### Get order history (all orders)
+GET {{baseUrl}}/customers/orders
+Authorization: Bearer {{customerToken}}
+
+### Get order history with filters
+GET {{baseUrl}}/customers/orders?status=DELIVERED&startDate=2023-01-01&endDate=2023-12-31&limit=5&offset=0&sortBy=createdAt&sortOrder=desc
+Authorization: Bearer {{customerToken}}
+
+### Get order details
+# Replace :orderId with an actual order ID
+GET {{baseUrl}}/customers/orders/:orderId
+Authorization: Bearer {{customerToken}}
+
+### Track order delivery
+# Replace :orderId with an actual order ID
+GET {{baseUrl}}/customers/orders/:orderId/track
+Authorization: Bearer {{customerToken}}
+
+### Cancel an order
+# Replace :orderId with an actual order ID
+POST {{baseUrl}}/customers/orders/:orderId/cancel
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "cancellationReason": "Found a better price elsewhere"
+}
+
+### WISHLIST MANAGEMENT ###
+
+### Get customer's wishlist
+GET {{baseUrl}}/customers/wishlist
+Authorization: Bearer {{customerToken}}
+
+### Add item to wishlist
+POST {{baseUrl}}/customers/wishlist
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "partId": "REPLACE_WITH_PART_ID"
+}
+
+### Check if a part is in the wishlist
+# Replace :partId with an actual part ID
+GET {{baseUrl}}/customers/wishlist/check/:partId
+Authorization: Bearer {{customerToken}}
+
+### Remove item from wishlist
+# Replace :wishlistItemId with an actual wishlist item ID
+DELETE {{baseUrl}}/customers/wishlist/:wishlistItemId
+Authorization: Bearer {{customerToken}}
+
+### Clear entire wishlist
+DELETE {{baseUrl}}/customers/wishlist
+Authorization: Bearer {{customerToken}}
+
+### RECENTLY VIEWED ITEMS ###
+
+### Get recently viewed parts
+GET {{baseUrl}}/customers/recently-viewed
+Authorization: Bearer {{customerToken}}
+
+### Get recently viewed parts with limit
+GET {{baseUrl}}/customers/recently-viewed?limit=5
+Authorization: Bearer {{customerToken}}
+
+### Track a recently viewed part
+POST {{baseUrl}}/customers/recently-viewed
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "partId": "REPLACE_WITH_PART_ID"
+}
+
+### ACCESS CONTROL TESTS ###
+
+### Attempt to access with a vendor token (should fail with 403)
+GET {{baseUrl}}/customers/profile
+Authorization: Bearer {{vendorToken}}
+
+### Attempt to access with a driver token (should fail with 403)
+GET {{baseUrl}}/customers/profile
+Authorization: Bearer {{driverToken}}
+
+### Attempt to access with an admin token (should fail with 403)
+GET {{baseUrl}}/customers/profile
+Authorization: Bearer {{adminToken}}
+
+### Attempt to access without token (should fail with 401)
+GET {{baseUrl}}/customers/profile

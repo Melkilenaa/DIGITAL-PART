@@ -1,0 +1,105 @@
+@baseUrl = http://localhost:3000/api
+@contentType = application/json
+
+### Variables for tokens (replace with actual tokens after login)
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlYjhjZTE0ZS0wZmZhLTQzZTMtYTc4Ny1lZTllOThkZGZjNDkiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiJjYzcxYzUzYS05ZWI0LTRjMzEtOTU4MS05ODljZjJhMjNkMTMiLCJpYXQiOjE3NDI1MTYwNzksImV4cCI6MTc0MjUxOTY3OX0.fYH2UncST2_7y5kDPOdLCkVluxkE8rabKHOL7Tt2LAY
+@vendorToken = REPLACE_WITH_VENDOR_TOKEN
+@driverToken = REPLACE_WITH_DRIVER_TOKEN
+@adminToken = REPLACE_WITH_ADMIN_TOKEN
+
+### BASIC VEHICLE OPERATIONS ###
+
+### Get all vehicles for the authenticated customer
+GET {{baseUrl}}/vehicles
+Authorization: Bearer {{customerToken}}
+
+### Get a specific vehicle by ID
+# Replace :vehicleId with an actual vehicle ID
+GET {{baseUrl}}/vehicles/c852afd3-7d50-43d0-8e00-1dbade25eaa5
+Authorization: Bearer {{customerToken}}
+
+### Create a new vehicle
+POST {{baseUrl}}/vehicles
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "make": "Volkswagen",
+  "model": "Golf GTI",
+  "year": 2020,
+  "vin": "4T1BF1FK5GU235677",
+  "licensePlate": "KCW 123W",
+  "engineType": "2.0L Turbo",
+  "transmissionType": "DSG Automatic",
+  "additionalDetails": {
+    "color": "Black",
+    "fuelType": "Petrol",
+    "mileage": 15000
+  },
+  "isDefault": true
+}
+
+### Update an existing vehicle
+# Replace :vehicleId with an actual vehicle ID
+PUT {{baseUrl}}/vehicles/:vehicleId
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "year": 2021,
+  "licensePlate": "XYZ789",
+  "additionalDetails": {
+    "color": "Blue",
+    "mileage": 25000
+  }
+}
+
+### Delete a vehicle
+# Replace :vehicleId with an actual vehicle ID
+DELETE {{baseUrl}}/vehicles/:vehicleId
+Authorization: Bearer {{customerToken}}
+
+### DEFAULT VEHICLE OPERATIONS ###
+
+### Get the default vehicle
+GET {{baseUrl}}/vehicles/default
+Authorization: Bearer {{customerToken}}
+
+### Set a vehicle as default
+# Replace :vehicleId with an actual vehicle ID
+PUT {{baseUrl}}/vehicles/:vehicleId/default
+Authorization: Bearer {{customerToken}}
+
+### ADVANCED FEATURES ###
+
+### Find compatible parts for a vehicle
+# Replace :vehicleId with an actual vehicle ID
+GET {{baseUrl}}/vehicles/:vehicleId/compatible-parts
+Authorization: Bearer {{customerToken}}
+
+### Find compatible parts with category filter
+# Replace :vehicleId with an actual vehicle ID and categoryId with a valid category
+GET {{baseUrl}}/vehicles/:vehicleId/compatible-parts?categoryId=:categoryId&limit=10
+Authorization: Bearer {{customerToken}}
+
+### Get maintenance recommendations for a vehicle
+# Replace :vehicleId with an actual vehicle ID
+GET {{baseUrl}}/vehicles/:vehicleId/maintenance
+Authorization: Bearer {{customerToken}}
+
+### ACCESS CONTROL TESTS ###
+
+### Attempt to access with a vendor token (should fail with 403)
+GET {{baseUrl}}/vehicles
+Authorization: Bearer {{vendorToken}}
+
+### Attempt to access with a driver token (should fail with 403)
+GET {{baseUrl}}/vehicles
+Authorization: Bearer {{driverToken}}
+
+### Attempt to access with an admin token (should fail with 403)
+GET {{baseUrl}}/vehicles
+Authorization: Bearer {{adminToken}}
+
+### Attempt to access without token (should fail with 401)
+GET {{baseUrl}}/vehicles
