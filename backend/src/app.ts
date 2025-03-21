@@ -5,6 +5,8 @@ import userRoutes from './routes/user.routes';
 import addressRoutes from './routes/address.routes';
 import customerRoutes from './routes/customer.routes';
 import vehicleRoutes from './routes/vehicle.routes';
+import categoryRoutes from './routes/category.routes';
+import partRoutes from './routes/part.routes';
 
 const cors = require('cors');
 const app = express();
@@ -18,5 +20,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/addresses', addressRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/vehicles', vehicleRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/parts', partRoutes);
 
 export default app;

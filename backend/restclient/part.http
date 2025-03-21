@@ -1,0 +1,176 @@
+@baseUrl = http://localhost:3000/api
+@contentType = application/json
+
+### Variables for tokens (replace with actual tokens after login)
+@adminToken = REPLACE_WITH_ADMIN_TOKEN
+@vendorToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiODUwMC0yNTMwLTQ1YzgtYmUzNC0yMzliZTM4OTM5NjUiLCJyb2xlIjoiVkVORE9SIiwic2Vzc2lvbklkIjoiMjkzMzVkMDItODZhYi00Y2FlLTk2MzgtN2M0N2QwY2JiZDQxIiwiaWF0IjoxNzQyNTY2MDQ0LCJleHAiOjE3NDI1Njk2NDR9.n2akzn6-OqbHnVYDVCGyoRsjbCLCbPLekjiPG01cfAM
+@customerToken = REPLACE_WITH_CUSTOMER_TOKEN
+
+### PUBLIC ROUTES (NO AUTH REQUIRED) ###
+
+### Get all parts
+GET {{baseUrl}}/parts
+
+### Get all parts with filtering and pagination
+GET {{baseUrl}}/parts?categoryId=CATEGORY_ID&brand=Toyota&minPrice=100&maxPrice=500&inStock=true&limit=10&offset=0&sortBy=price&sortOrder=asc
+
+### Search parts by keyword
+GET {{baseUrl}}/parts/search?keyword=brake&limit=5
+
+### Search with advanced filtering
+GET {{baseUrl}}/parts/search?keyword=engine&categoryId=CATEGORY_ID&minPrice=200&maxPrice=1000&sortBy=relevance
+
+### Find compatible parts for a vehicle
+GET {{baseUrl}}/parts/compatible?make=Toyota&model=Camry&year=2020&categoryId=CATEGORY_ID&limit=10
+
+### Get popular parts
+GET {{baseUrl}}/parts/popular
+
+### Get popular parts with custom limit
+GET {{baseUrl}}/parts/popular?limit=5
+
+### Get top brands
+GET {{baseUrl}}/parts/brands
+
+### Get part by ID
+# Replace :partId with an actual part ID
+GET {{baseUrl}}/parts/:partId
+
+### Get related parts
+# Replace :partId with an actual part ID
+GET {{baseUrl}}/parts/:partId/related?limit=5
+
+### CUSTOMER-ONLY ROUTES ###
+
+### Get recently viewed parts
+GET {{baseUrl}}/parts/recently-viewed
+Authorization: Bearer {{customerToken}}
+
+### Get recently viewed parts with custom limit
+GET {{baseUrl}}/parts/recently-viewed?limit=5
+Authorization: Bearer {{customerToken}}
+
+### Track recently viewed part
+POST {{baseUrl}}/parts/recently-viewed
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "partId": "REPLACE_WITH_PART_ID"
+}
+
+### ADMIN & VENDOR ROUTES ###
+
+### Create a new part
+POST {{baseUrl}}/parts
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "name": "Ceramic Brake Pads for Toyota Camry (2018-2022)",
+  "description": "Premium quality ceramic brake pads with anti-noise shims and wear indicators",
+  "partNumber": "BP-TC-18-22",
+  "barcode": "1234567890123",
+  "price": 89.99,
+  "condition": "NEW",
+  "brand": "BrakeMaster",
+  "images": [
+    "https://example.com/images/parts/brake-pads-1.jpg",
+    "https://example.com/images/parts/brake-pads-2.jpg"
+  ],
+  "stockQuantity": 25,
+  "lowStockAlert": 5,
+  "specifications": {
+    "material": "Ceramic",
+    "position": "Front",
+    "warranty": "12 months"
+  },
+  "compatibleVehicles": [
+    {
+      "make": "Toyota",
+      "model": "Camry",
+      "year": 2018,
+      "makeModel": "Toyota|Camry",
+      "makeModelYear": "Toyota|Camry|2018"
+    },
+    {
+      "make": "Toyota",
+      "model": "Camry",
+      "year": 2019,
+      "makeModel": "Toyota|Camry",
+      "makeModelYear": "Toyota|Camry|2019"
+    }
+  ],
+  "weight": 2.5,
+  "dimensions": "15x10x5 cm",
+  "categoryId": "89f4fdfc-5b0b-416a-9e5e-c7b5066719a7",
+  "vendorId": "54018734-7112-41b3-b4bb-d3655a3db733",
+  "tags": ["brake", "ceramic", "toyota", "camry"]
+}
+
+### Update a part
+# Replace :partId with an actual part ID
+PUT {{baseUrl}}/parts/:partId
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "name": "Premium Ceramic Brake Pads for Toyota Camry (2018-2022)",
+  "description": "Updated description with improved features",
+  "price": 94.99,
+  "stockQuantity": 30,
+  "tags": ["brake", "ceramic", "premium", "toyota", "camry"]
+}
+
+### Delete a part
+# Replace :partId with an actual part ID
+DELETE {{baseUrl}}/parts/:partId
+Authorization: Bearer {{vendorToken}}
+
+### Update stock quantity
+# Replace :partId with an actual part ID
+PUT {{baseUrl}}/parts/:partId/stock
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "quantity": 42
+}
+
+### Apply discount
+# Replace :partId with an actual part ID
+PUT {{baseUrl}}/parts/:partId/discount
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "discountedPrice": 79.99
+}
+
+### Remove discount
+# Replace :partId with an actual part ID
+DELETE {{baseUrl}}/parts/:partId/discount
+Authorization: Bearer {{vendorToken}}
+
+### ACCESS CONTROL TESTS ###
+
+### Try to create a part with customer token (should fail with 403)
+POST {{baseUrl}}/parts
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "name": "This should fail",
+  "price": 100,
+  "stockQuantity": 10,
+  "categoryId": "SOME_ID",
+  "vendorId": "SOME_ID"
+}
+
+### Try to track recently viewed without auth (should fail with 401)
+POST {{baseUrl}}/parts/recently-viewed
+Content-Type: {{contentType}}
+
+{
+  "partId": "SOME_ID"
+}

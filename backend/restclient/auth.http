@@ -1,5 +1,6 @@
 @baseUrl = http://localhost:3000/api/auth
 @contentType = application/json
+@adminAccessToken = 
 
 ### Customer Registration
 POST {{baseUrl}}/register/customer
@@ -89,8 +90,8 @@ POST {{baseUrl}}/login
 Content-Type: {{contentType}}
 
 {
-  "email": "vendor@example.com",
-  "password": "Password123!",
+  "email": "autoparts@example.com",
+  "password": "Vendor123!",
   "deviceInfo": {
     "token": "fcm-token-vendor-device",
     "device": "Samsung Galaxy S22",
@@ -185,11 +186,9 @@ POST {{baseUrl}}/login
 Content-Type: {{contentType}}
 
 {
-  "email": "admin@example.com",
-  "password": "AdminPass123!"
+  "email": "admin@damps.com",
+  "password": "Admin123!"
 }
-
-@adminAccessToken = {{loginAdmin.response.body.data.accessToken}}
 
 ### Create new admin (must be performed by existing super admin)
 POST {{baseUrl}}/register/admin

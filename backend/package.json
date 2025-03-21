@@ -13,6 +13,8 @@
   "seed:clean": "ts-node src/seeders/main.seeder.ts --clean",
   "seed:auth": "ts-node src/seeders/auth.seeder.ts",
   "seed:user": "ts-node src/seeders/user.seeder.ts",
+  "seed:category": "ts-node src/seeders/category.seeder.ts",
+  "seed:part": "ts-node src/seeders/part.seeder.ts",
   "seed:auth:clean": "ts-node src/seeders/auth.seeder.ts ",
   "seed:user:clean": "ts-node src/seeders/user.seeder.ts --clean"
 
