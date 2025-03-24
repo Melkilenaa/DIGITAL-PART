@@ -3,6 +3,7 @@ import { UserRole } from '@prisma/client';
 import partController from '../controllers/part.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { roleGuard } from '../middlewares/role.guard';
+import { upload } from '../utils/cloudinary.util';
 
 const router = express.Router();
 
@@ -25,9 +26,9 @@ router.post('/recently-viewed', partController.trackRecentlyViewed.bind(partCont
 router.use(['/inventory', '/pricing'], authMiddleware);
 router.use(['/inventory', '/pricing'], roleGuard([UserRole.ADMIN, UserRole.VENDOR]));
 
-// Inventory management
-router.post('/', partController.createPart.bind(partController));
-router.put('/:partId', partController.updatePart.bind(partController));
+// Inventory management with file uploads
+router.post('/', upload.array('images', 10), partController.createPart.bind(partController));
+router.put('/:partId', upload.array('images', 10), partController.updatePart.bind(partController));
 router.delete('/:partId', partController.deletePart.bind(partController));
 router.put('/:partId/stock', partController.updateStock.bind(partController));
 

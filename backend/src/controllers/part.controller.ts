@@ -135,7 +135,7 @@ export class PartController {
   }
 
   /**
-   * Create a new part
+   * Create a new part with image uploads
    */
   async createPart(req: Request, res: Response): Promise<void> {
     try {
@@ -150,22 +150,55 @@ export class PartController {
         });
         return;
       }
-
-      // Validate numeric fields
-      if (typeof partData.price !== 'number' || partData.price <= 0) {
-        res.status(400).json({
-          success: false,
-          message: 'Price must be a positive number'
-        });
-        return;
+      
+      // Parse numeric fields
+      if (partData.price) {
+        partData.price = parseFloat(partData.price);
+      }
+      
+      if (partData.stockQuantity) {
+        partData.stockQuantity = parseInt(partData.stockQuantity);
+      }
+      
+      if (partData.lowStockAlert) {
+        partData.lowStockAlert = parseInt(partData.lowStockAlert);
+      }
+      
+      if (partData.weight) {
+        partData.weight = parseFloat(partData.weight);
       }
 
-      if (typeof partData.stockQuantity !== 'number' || partData.stockQuantity < 0) {
-        res.status(400).json({
-          success: false,
-          message: 'Stock quantity must be a non-negative number'
-        });
-        return;
+      // Handle uploaded files
+      if (req.files && Array.isArray(req.files)) {
+        // Convert uploaded files to an array of Cloudinary URLs
+        partData.images = req.files.map(file => file.path);
+        console.log('Part images uploaded:', partData.images);
+      }
+      
+      // Parse JSON strings if they are present
+      if (partData.specifications && typeof partData.specifications === 'string') {
+        try {
+          partData.specifications = JSON.parse(partData.specifications);
+        } catch (e) {
+          console.error('Failed to parse specifications JSON', e);
+        }
+      }
+      
+      if (partData.compatibleVehicles && typeof partData.compatibleVehicles === 'string') {
+        try {
+          partData.compatibleVehicles = JSON.parse(partData.compatibleVehicles);
+        } catch (e) {
+          console.error('Failed to parse compatibleVehicles JSON', e);
+        }
+      }
+      
+      if (partData.tags && typeof partData.tags === 'string') {
+        try {
+          partData.tags = JSON.parse(partData.tags);
+        } catch (e) {
+          // If parsing fails, try splitting by comma
+          partData.tags = partData.tags.split(',').map((tag: string) => tag.trim());
+        }
       }
 
       const newPart = await partService.createPart(partData);
@@ -176,6 +209,7 @@ export class PartController {
         data: newPart
       });
     } catch (error: any) {
+      console.error('Part creation error:', error);
       let statusCode = 500;
       
       if (error.message === 'Category not found' || error.message === 'Vendor not found') {
@@ -190,7 +224,7 @@ export class PartController {
   }
 
   /**
-   * Update an existing part
+   * Update an existing part with image uploads
    */
   async updatePart(req: Request, res: Response): Promise<void> {
     try {
@@ -205,22 +239,69 @@ export class PartController {
         return;
       }
 
-      // Validate numeric fields if provided
-      if (partData.price !== undefined && (typeof partData.price !== 'number' || partData.price <= 0)) {
-        res.status(400).json({
-          success: false,
-          message: 'Price must be a positive number'
-        });
-        return;
+      // Parse numeric fields if provided
+      if (partData.price !== undefined) {
+        partData.price = parseFloat(partData.price);
       }
 
-      if (partData.stockQuantity !== undefined && 
-          (typeof partData.stockQuantity !== 'number' || partData.stockQuantity < 0)) {
-        res.status(400).json({
-          success: false,
-          message: 'Stock quantity must be a non-negative number'
-        });
-        return;
+      if (partData.stockQuantity !== undefined) {
+        partData.stockQuantity = parseInt(partData.stockQuantity);
+      }
+      
+      if (partData.lowStockAlert !== undefined) {
+        partData.lowStockAlert = parseInt(partData.lowStockAlert);
+      }
+      
+      if (partData.weight !== undefined) {
+        partData.weight = parseFloat(partData.weight);
+      }
+
+      // Handle uploaded files
+      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        // Get new image URLs from the uploaded files
+        const newImageUrls = req.files.map(file => file.path);
+        
+        // If appendImages flag is set, append to existing images, otherwise replace
+        if (partData.appendImages === 'true') {
+          // Get the existing part to extract current images
+          const existingPart = await partService.getPartById(partId);
+          if (existingPart && existingPart.images) {
+            partData.images = [...existingPart.images, ...newImageUrls];
+          } else {
+            partData.images = newImageUrls;
+          }
+        } else {
+          // Replace all images
+          partData.images = newImageUrls;
+        }
+        
+        console.log('Updated part images:', partData.images);
+      }
+      
+      // Parse JSON strings if they are present
+      if (partData.specifications && typeof partData.specifications === 'string') {
+        try {
+          partData.specifications = JSON.parse(partData.specifications);
+        } catch (e) {
+          console.error('Failed to parse specifications JSON', e);
+        }
+      }
+      
+      if (partData.compatibleVehicles && typeof partData.compatibleVehicles === 'string') {
+        try {
+          partData.compatibleVehicles = JSON.parse(partData.compatibleVehicles);
+        } catch (e) {
+          console.error('Failed to parse compatibleVehicles JSON', e);
+        }
+      }
+      
+      if (partData.tags && typeof partData.tags === 'string') {
+        try {
+          partData.tags = JSON.parse(partData.tags);
+        } catch (e) {
+          // If parsing fails, try splitting by comma
+          partData.tags = partData.tags.split(',').map((tag: string) => tag.trim());
+        }
       }
 
       const updatedPart = await partService.updatePart(partId, partData);
@@ -231,6 +312,7 @@ export class PartController {
         data: updatedPart
       });
     } catch (error: any) {
+      console.error('Part update error:', error);
       let statusCode = 500;
       
       if (error.message === 'Part not found') {

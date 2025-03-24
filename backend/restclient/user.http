@@ -1,11 +1,11 @@
-@baseUrl = http://localhost:3000/api/users
+@baseUrl = http://localhost:3003/api/users
 @contentType = application/json
 
 ### Variables for tokens from auth.http
-@customerToken = REPLACE_WITH_CUSTOMER_TOKEN
-@vendorToken = REPLACE_WITH_VENDOR_TOKEN
-@driverToken = REPLACE_WITH_DRIVER_TOKEN
-@adminToken = REPLACE_WITH_ADMIN_TOKEN
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiI4MzBjZDdjYS0xODZlLTRkYTgtOGY3Ni1kMDA2ZjlhMDk0MjQiLCJpYXQiOjE3NDI4Mjg5NjIsImV4cCI6MTc0MjgzMjU2Mn0.QdSNdBJw813S2XNcNSD29R0P2g0sRAeFz58B41G8u-c
+@vendorToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkNDY2ZDgyYy02MDYzLTQ2NDQtYjc1Zi1mYjBhMDE1MWMxZDgiLCJyb2xlIjoiVkVORE9SIiwic2Vzc2lvbklkIjoiZmNkMTM4YzAtMWNjMC00NmM3LWEwMGYtNjcxMWExMmE4YTZlIiwiaWF0IjoxNzQyODMwNDY1LCJleHAiOjE3NDI4MzQwNjV9.M0y01N9btQsfVdQF6tRDWIFF7dLFcpgIz9yAraMhTPc
+@driverToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkNjhiZWM2NC03MWQwLTQ3MjAtYmU3My0zOWJkYjJmNmU1NWUiLCJyb2xlIjoiRFJJVkVSIiwic2Vzc2lvbklkIjoiOGQ5NmZhNjAtOTA3My00NmQ2LTk2ZDQtMjE3NTQ1NzZjYzk5IiwiaWF0IjoxNzQyODI4OTkxLCJleHAiOjE3NDI4MzI1OTF9.6g0VZ24n6SBdWv4aveVMzLFdq4t8j8suFyacGv8xWAk
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwZDYwY2Q5MC0yZjM1LTRjNTctODFmMy05NWM1MDM2YWFiNDciLCJyb2xlIjoiQURNSU4iLCJzZXNzaW9uSWQiOiIyYzFhODA1Ny04YmMyLTQwZTUtODgwMi00YzFhZWEzNTYzYzciLCJpYXQiOjE3NDI4MzA1NTYsImV4cCI6MTc0MjgzNDE1Nn0.ufxE6M4_pTxfokXkUyWcDpAmuZ3ReKi_iUKtlZ-QPHQ
 
 ### ---------- PROFILE MANAGEMENT ---------- ###
 
@@ -21,45 +21,77 @@ Authorization: Bearer {{vendorToken}}
 GET {{baseUrl}}/profile
 Authorization: Bearer {{driverToken}}
 
-### Update customer profile
+### Update customer profile with image upload
 PUT {{baseUrl}}/profile
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Authorization: Bearer {{customerToken}}
 
-{
-  "firstName": "John Updated",
-  "lastName": "Doe Updated",
-  "profileImage": "https://example.com/updated-profile.jpg"
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="firstName"
 
-### Update vendor profile
+John
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lastName"
+
+Doe Updated
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="profileImage"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/r32.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Update vendor profile with logo upload
 PUT {{baseUrl}}/profile
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Authorization: Bearer {{vendorToken}}
 
-{
-  "businessName": "AutoParts Plus Updated",
-  "businessLogo": "https://example.com/updated-logo.png",
-  "businessDescription": "Updated high quality automotive parts for all brands",
-  "address": "123 Main Street Updated",
-  "city": "Lagos Updated",
-  "state": "Lagos State",
-  "country": "Nigeria",
-  "specializations": ["Engine Parts", "Brake Systems", "Electrical Components", "Suspension Parts"]
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="businessName"
 
-### Update driver profile
+AutoParts Plus Updated
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="businessDescription"
+
+Premium automotive parts supplier
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="address"
+
+456 Business Avenue
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="profileImage"; filename="business-logo.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/bmw.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Update driver profile with image upload
 PUT {{baseUrl}}/profile
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Authorization: Bearer {{driverToken}}
 
-{
-  "firstName": "Michael Updated",
-  "lastName": "Johnson Updated",
-  "profileImage": "https://example.com/updated-driver-profile.jpg",
-  "vehicleType": "Car",
-  "vehicleColor": "Blue Updated"
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="firstName"
+
+Michael
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lastName"
+
+Johnson Updated
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="vehicleType"
+
+SUV
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="vehicleColor"
+
+Black
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="profileImage"; filename="driver-photo.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/supra.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### ---------- ACCOUNT SETTINGS ---------- ###
 
@@ -116,53 +148,72 @@ Authorization: Bearer {{customerToken}}
 
 ### ---------- VERIFICATION DOCUMENT SUBMISSION ---------- ###
 
-### Submit vendor verification documents
+### Submit vendor verification documents with file uploads
 POST {{baseUrl}}/verification/documents
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Authorization: Bearer {{vendorToken}}
 
-{
-  "type": "VENDOR",
-  "documents": [
-    {
-      "type": "BUSINESS_LICENSE",
-      "fileUrl": "https://example.com/documents/business-license.pdf",
-      "description": "Business operating license"
-    },
-    {
-      "type": "TAX_CERTIFICATE",
-      "fileUrl": "https://example.com/documents/tax-certificate.pdf",
-      "description": "Tax registration certificate"
-    }
-  ],
-  "additionalInfo": {
-    "businessRegistrationNumber": "REG12345",
-    "taxIdentificationNumber": "TIN67890"
-  }
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="type"
 
-### Submit driver verification documents
+VENDOR
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="docTypes"
+
+["BUSINESS_LICENSE", "TAX_CERTIFICATE"]
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="docDescriptions"
+
+["Business operating license", "Tax registration certificate"]
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="additionalInfo"
+
+{"businessRegistrationNumber":"REG12345","taxIdentificationNumber":"TIN67890"}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="documents"; filename="business-license.pdf"
+Content-Type: application/pdf
+
+< /home/user/Downloads/guide.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="documents"; filename="tax-certificate.pdf"
+Content-Type: application/pdf
+
+< /home/user/Downloads/Pricing_Proposal.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Submit driver verification documents with file uploads
 POST {{baseUrl}}/verification/documents
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Authorization: Bearer {{driverToken}}
 
-{
-  "type": "DRIVER",
-  "documents": [
-    {
-      "type": "DRIVING_LICENSE",
-      "fileUrl": "https://example.com/documents/driving-license.pdf"
-    },
-    {
-      "type": "INSURANCE",
-      "fileUrl": "https://example.com/documents/insurance.pdf"
-    },
-    {
-      "type": "IDENTIFICATION",
-      "fileUrl": "https://example.com/documents/id-card.pdf"
-    }
-  ]
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="type"
+
+DRIVER
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="docTypes"
+
+["DRIVING_LICENSE", "INSURANCE", "IDENTIFICATION"]
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="docDescriptions"
+
+["Driver's license", "Vehicle insurance", "Government ID"]
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="documents"; filename="license.pdf"
+Content-Type: application/pdf
+
+< /home/user/Downloads/guide.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="documents"; filename="insurance.pdf"
+Content-Type: application/pdf
+
+< /home/user/Downloads/Pricing_Proposal.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="documents"; filename="id-card.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/r32.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### ---------- ADMIN FUNCTIONS ---------- ###
 

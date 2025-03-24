@@ -200,7 +200,7 @@ POST {{baseUrl}}/login
 Content-Type: {{contentType}}
 
 {
-  "email": "vendor@example.com",
+  "email": "vendor@example12.com",
   "password": "Password123!",
   "deviceInfo": {
     "token": "fcm-token-vendor-device",

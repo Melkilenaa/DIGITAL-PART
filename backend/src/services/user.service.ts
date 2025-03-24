@@ -193,11 +193,61 @@ export class UserService {
    * Update vendor profile
    */
   async updateVendorProfile(data: UpdateProfileDto): Promise<any> {
+    console.log(`DEBUG: Looking for vendor with userId: ${data.userId}`);
+    
+    // Check if user exists first (should be true based on the token)
+    const user = await this.prisma.user.findUnique({
+      where: { id: data.userId }
+    });
+    
+    if (!user) {
+      console.error(`User with ID ${data.userId} not found`);
+      throw new Error('User not found');
+    }
+    
+    console.log(`DEBUG: Found user with role ${user.role} and email ${user.email}`);
+    
+    // See if there's any vendor record with this email
+    if (user.email) {
+      const vendorByEmail = await this.prisma.vendor.findFirst({
+        where: { email: user.email }
+      });
+      
+      if (vendorByEmail) {
+        console.log(`DEBUG: Found vendor with matching email ${user.email}`);
+        console.log(`DEBUG: Vendor.userId=${vendorByEmail.userId}, User.id=${user.id}`);
+        
+        // If IDs don't match, we found the issue
+        if (vendorByEmail.userId !== user.id) {
+          console.log(`DEBUG: MISMATCH - Updating userId reference to fix the issue...`);
+          
+          // Fix the mismatch by updating the vendor's userId
+          await this.prisma.vendor.update({
+            where: { id: vendorByEmail.id },
+            data: { userId: user.id }
+          });
+          
+          console.log(`DEBUG: Fixed userId reference for vendor ${vendorByEmail.id}`);
+        }
+      } else {
+        console.log(`DEBUG: No vendor found with email ${user.email}`);
+      }
+    }
+    
+    // Try the normal lookup
     const vendor = await this.prisma.vendor.findUnique({
       where: { userId: data.userId },
     });
 
     if (!vendor) {
+      // Last resort - look at all vendors in the database
+      const allVendors = await this.prisma.vendor.findMany({
+        select: { id: true, userId: true, email: true, businessName: true }
+      });
+      
+      console.log(`DEBUG: All vendors in system (${allVendors.length}):`);
+      console.log(JSON.stringify(allVendors, null, 2));
+      
       throw new Error('Vendor profile not found');
     }
 

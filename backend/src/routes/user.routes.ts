@@ -3,6 +3,7 @@ import userController from '../controllers/user.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { roleGuard } from '../middlewares/role.guard';
 import { UserRole } from '@prisma/client';
+import { upload } from '../utils/cloudinary.util';
 
 const router = express.Router();
 
@@ -11,7 +12,8 @@ router.use(authMiddleware);
 
 // Profile management routes
 router.get('/profile', userController.getUserProfile.bind(userController));
-router.put('/profile', userController.updateProfile.bind(userController));
+// Add upload middleware for profile updates to handle image uploads
+router.put('/profile', upload.single('profileImage'), userController.updateProfile.bind(userController));
 
 // Account settings routes
 router.put('/account/settings', userController.updateAccountSettings.bind(userController));
@@ -21,8 +23,11 @@ router.get('/device-tokens', userController.getUserDeviceTokens.bind(userControl
 router.post('/device-tokens', userController.registerDeviceToken.bind(userController));
 router.delete('/device-tokens', userController.removeDeviceToken.bind(userController));
 
-// Verification document submission (for vendors and drivers)
-router.post('/verification/documents', userController.submitVerificationDocuments.bind(userController));
+// Verification document submission with file uploads
+router.post('/verification/documents', 
+  upload.array('documents', 5), // Allow up to 5 document uploads
+  userController.submitVerificationDocuments.bind(userController)
+);
 
 // Admin routes - require admin role
 const adminRouter = express.Router();

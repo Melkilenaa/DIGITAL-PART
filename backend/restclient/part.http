@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:3000/api
+@baseUrl = http://localhost:3003/api
 @contentType = application/json
 
 ### Variables for tokens (replace with actual tokens after login)
@@ -61,66 +61,111 @@ Authorization: Bearer {{customerToken}}
 
 ### ADMIN & VENDOR ROUTES ###
 
-### Create a new part
+### Create a new part with image upload (multipart/form-data)
 POST {{baseUrl}}/parts
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Authorization: Bearer {{vendorToken}}
 
-{
-  "name": "Ceramic Brake Pads for Toyota Camry (2018-2022)",
-  "description": "Premium quality ceramic brake pads with anti-noise shims and wear indicators",
-  "partNumber": "BP-TC-18-22",
-  "barcode": "1234567890123",
-  "price": 89.99,
-  "condition": "NEW",
-  "brand": "BrakeMaster",
-  "images": [
-    "https://example.com/images/parts/brake-pads-1.jpg",
-    "https://example.com/images/parts/brake-pads-2.jpg"
-  ],
-  "stockQuantity": 25,
-  "lowStockAlert": 5,
-  "specifications": {
-    "material": "Ceramic",
-    "position": "Front",
-    "warranty": "12 months"
-  },
-  "compatibleVehicles": [
-    {
-      "make": "Toyota",
-      "model": "Camry",
-      "year": 2018,
-      "makeModel": "Toyota|Camry",
-      "makeModelYear": "Toyota|Camry|2018"
-    },
-    {
-      "make": "Toyota",
-      "model": "Camry",
-      "year": 2019,
-      "makeModel": "Toyota|Camry",
-      "makeModelYear": "Toyota|Camry|2019"
-    }   
-  ],
-  "weight": 2.5,
-  "dimensions": "15x10x5 cm",
-  "categoryId": "89f4fdfc-5b0b-416a-9e5e-c7b5066719a7",
-  "vendorId": "54018734-7112-41b3-b4bb-d3655a3db733",
-  "tags": ["brake", "ceramic", "toyota", "camry"]
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
 
-### Update a part
+Performance Brake Pads for Honda Accord
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="description"
+
+High-performance ceramic brake pads with advanced stopping power
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="partNumber"
+
+BP-HA-19-23
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="barcode"
+
+9876543210987
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="price"
+
+99.99
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="condition"
+
+NEW
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="brand"
+
+StopTech
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="stockQuantity"
+
+15
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lowStockAlert"
+
+3
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="weight"
+
+2.8
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="dimensions"
+
+16x11x6 cm
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="categoryId"
+
+89f4fdfc-5b0b-416a-9e5e-c7b5066719a7
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="vendorId"
+
+54018734-7112-41b3-b4bb-d3655a3db733
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="specifications"
+
+{"material":"Ceramic","position":"Front","warranty":"24 months"}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="compatibleVehicles"
+
+[{"make":"Honda","model":"Accord","year":2019,"makeModel":"Honda|Accord","makeModelYear":"Honda|Accord|2019"},{"make":"Honda","model":"Accord","year":2020,"makeModel":"Honda|Accord","makeModelYear":"Honda|Accord|2020"}]
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="tags"
+
+brake,ceramic,honda,accord,premium
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="images"; filename="brake-pad-1.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/brakepads2.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="images"; filename="brake-pad-2.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/brakepads2.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Update a part with image upload (multipart/form-data)
 # Replace :partId with an actual part ID
-PUT {{baseUrl}}/parts/:partId
-Content-Type: {{contentType}}
+PUT {{baseUrl}}/parts/56bf6889-848a-476b-bb23-92aeb976bfd4
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Authorization: Bearer {{vendorToken}}
 
-{
-  "name": "Premium Ceramic Brake Pads for Toyota Camry (2018-2022)",
-  "description": "Updated description with improved features",
-  "price": 94.99,
-  "stockQuantity": 30,
-  "tags": ["brake", "ceramic", "premium", "toyota", "camry"]
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
+
+Updated Performance Brake Pads
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="description"
+
+New improved formula for even better stopping power
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="price"
+
+109.99
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="images"; filename="brake-pad-new-angle.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/brakepads.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Delete a part
 # Replace :partId with an actual part ID
@@ -129,7 +174,7 @@ Authorization: Bearer {{vendorToken}}
 
 ### Update stock quantity
 # Replace :partId with an actual part ID
-PUT {{baseUrl}}/parts/:partId/stock
+PUT {{baseUrl}}/parts/56bf6889-848a-476b-bb23-92aeb976bfd4/stock
 Content-Type: {{contentType}}
 Authorization: Bearer {{vendorToken}}
 

@@ -41,17 +41,33 @@ export class UserController {
   async updateProfile(req: Request, res: Response): Promise<void> {
     try {
       const userId = req.user?.userId;
+      const userRole = req.user?.role;
       
       if (!userId) {
         res.status(401).json({ message: 'Authentication required' });
         return;
       }
 
-      // Combine userId with profile data from request body
-      const profileData = {
-        userId,
-        ...req.body
-      };
+      const profileData = { ...req.body, userId };
+
+      // Handle file upload if image is present
+      if (req.file) {
+        try {
+          // The Cloudinary URL is already in req.file.path
+          const imageUrl = req.file.path;
+          console.log(`Upload successful: ${imageUrl}`);
+          
+          // Assign the image URL to the appropriate field based on user role
+          if (userRole === UserRole.CUSTOMER || userRole === UserRole.DRIVER) {
+            profileData.profileImage = imageUrl;
+          } else if (userRole === UserRole.VENDOR) {
+            profileData.businessLogo = imageUrl;
+          }
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          // Continue update without changing the image
+        }
+      }
 
       const updatedProfile = await userService.updateProfile(profileData);
       res.status(200).json({
@@ -59,6 +75,7 @@ export class UserController {
         data: updatedProfile
       });
     } catch (error: any) {
+      console.error('Profile update error:', error);
       res.status(error.message.includes('not found') ? 404 : 400).json({
         message: 'Failed to update profile',
         error: error.message
@@ -207,24 +224,57 @@ export class UserController {
         return;
       }
 
-      const { type, documents, additionalInfo } = req.body;
+      const { type, additionalInfo } = req.body;
       
-      if (!type || !documents || !Array.isArray(documents) || documents.length === 0) {
-        res.status(400).json({ message: 'Valid type and documents are required' });
+      if (!type) {
+        res.status(400).json({ message: 'Document type is required' });
         return;
+      }
+
+      // Handle uploaded documents
+      const documents = [];
+      if (req.files && Array.isArray(req.files)) {
+        // Extract document information from the request
+        const docTypes = req.body.docTypes ? JSON.parse(req.body.docTypes) : [];
+        const docDescriptions = req.body.docDescriptions ? JSON.parse(req.body.docDescriptions) : [];
+        
+        // Map uploaded files to document objects
+        for (let i = 0; i < req.files.length; i++) {
+          documents.push({
+            type: docTypes[i] || `DOCUMENT_${i+1}`,
+            fileUrl: req.files[i].path,
+            description: docDescriptions[i] || `Verification document ${i+1}`
+          });
+        }
+      }
+      
+      if (documents.length === 0) {
+        res.status(400).json({ message: 'At least one document is required' });
+        return;
+      }
+
+      // Parse additionalInfo if it's a string
+      let parsedAdditionalInfo = additionalInfo;
+      if (typeof additionalInfo === 'string') {
+        try {
+          parsedAdditionalInfo = JSON.parse(additionalInfo);
+        } catch (e) {
+          console.error('Failed to parse additionalInfo:', e);
+        }
       }
 
       const result = await userService.submitVerificationDocuments({
         userId,
         type,
         documents,
-        additionalInfo
+        additionalInfo: parsedAdditionalInfo
       });
       
       res.status(200).json({
         message: result.message,
       });
     } catch (error: any) {
+      console.error('Document submission error:', error);
       let statusCode = 400;
       if (error.message.includes('not found')) {
         statusCode = 404;
