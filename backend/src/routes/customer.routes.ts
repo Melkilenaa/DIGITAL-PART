@@ -3,6 +3,7 @@ import { UserRole } from '@prisma/client';
 import customerController from '../controllers/customer.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { roleGuard } from '../middlewares/role.guard';
+import { upload } from '../utils/cloudinary.util';
 
 const router = express.Router();
 
@@ -12,7 +13,8 @@ router.use(roleGuard([UserRole.CUSTOMER]));
 
 // Profile management
 router.get('/profile', customerController.getCustomerProfile.bind(customerController));
-router.put('/profile', customerController.updateCustomerProfile.bind(customerController));
+// Add upload middleware for profile update to handle profile image uploads
+router.put('/profile', upload.single('profileImage'), customerController.updateCustomerProfile.bind(customerController));
 
 // Order management
 router.get('/orders', customerController.getOrderHistory.bind(customerController));

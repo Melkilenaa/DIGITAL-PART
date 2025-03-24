@@ -3,6 +3,7 @@ import { UserRole } from '@prisma/client';
 import categoryController from '../controllers/category.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { roleGuard } from '../middlewares/role.guard';
+import { upload } from '../utils/cloudinary.util';
 
 const router = express.Router();
 
@@ -20,8 +21,9 @@ router.get('/:categoryId/breadcrumb', categoryController.getCategoryBreadcrumb.b
 router.use(authMiddleware);
 router.use(roleGuard([UserRole.ADMIN]));
 
-router.post('/', categoryController.createCategory.bind(categoryController));
-router.put('/:categoryId', categoryController.updateCategory.bind(categoryController));
+// Add file upload middleware to routes that handle images
+router.post('/', upload.single('image'), categoryController.createCategory.bind(categoryController));
+router.put('/:categoryId', upload.single('image'), categoryController.updateCategory.bind(categoryController));
 router.delete('/:categoryId', categoryController.deleteCategory.bind(categoryController));
 router.put('/:categoryId/commission', categoryController.updateCommissionRate.bind(categoryController));
 

@@ -187,12 +187,7 @@ Content-Type: {{contentType}}
 
 {
   "email": "customer@example.com",
-  "password": "Password123!",
-  "deviceInfo": {
-    "token": "fcm-token-customer-device",
-    "device": "iPhone 13 Pro",
-    "platform": "iOS"
-  }
+  "password": "Password123!"
 }
 
 ### Save customer tokens for subsequent requests

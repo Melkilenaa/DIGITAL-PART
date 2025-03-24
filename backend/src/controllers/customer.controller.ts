@@ -31,6 +31,19 @@ export class CustomerController {
       const userId = req.user!.userId;
       const profileData = req.body;
       
+      // Handle profile image upload if file is present
+      if (req.file) {
+        try {
+          // The file is already uploaded to Cloudinary by multer-storage-cloudinary
+          // The URL will be in req.file.path
+          profileData.profileImage = req.file.path;
+          console.log('Profile image uploaded to:', req.file.path);
+        } catch (uploadError) {
+          console.error('Profile image upload error:', uploadError);
+          // Continue profile update without image if upload fails
+        }
+      }
+      
       const updatedProfile = await customerService.updateCustomerProfile(userId, profileData);
       
       res.status(200).json({
@@ -39,6 +52,7 @@ export class CustomerController {
         data: updatedProfile
       });
     } catch (error: any) {
+      console.error('Profile update error:', error);
       res.status(error.message === 'Customer profile not found' ? 404 : 500).json({
         success: false,
         message: error.message || 'Failed to update customer profile'

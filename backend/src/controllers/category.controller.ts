@@ -75,6 +75,21 @@ export class CategoryController {
         return;
       }
 
+      // Handle image upload if file is present
+      if (req.file) {
+        categoryData.image = req.file.path;
+      }
+      
+      // Parse numeric fields
+      if (categoryData.commissionRate) {
+        categoryData.commissionRate = parseFloat(categoryData.commissionRate);
+      }
+      
+      // Handle empty parentId
+      if (categoryData.parentId === '') {
+        categoryData.parentId = null;
+      }
+
       const newCategory = await categoryService.createCategory(categoryData);
       
       res.status(201).json({
@@ -83,6 +98,7 @@ export class CategoryController {
         data: newCategory
       });
     } catch (error: any) {
+      console.error('Category creation error:', error);
       const statusCode = 
         error.message === 'Category name already exists' || 
         error.message === 'Parent category not found' ? 400 : 500;
@@ -108,6 +124,21 @@ export class CategoryController {
           message: 'Category ID is required'
         });
         return;
+      }
+
+      // Handle image upload if file is present
+      if (req.file) {
+        categoryData.image = req.file.path;
+      }
+      
+      // Parse numeric fields
+      if (categoryData.commissionRate) {
+        categoryData.commissionRate = parseFloat(categoryData.commissionRate);
+      }
+      
+      // Handle empty parentId
+      if (categoryData.parentId === '') {
+        categoryData.parentId = null;
       }
 
       const updatedCategory = await categoryService.updateCategory(categoryId, categoryData);

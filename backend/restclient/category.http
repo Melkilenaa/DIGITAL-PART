@@ -1,8 +1,8 @@
-@baseUrl = http://localhost:3000/api
+@baseUrl = http://localhost:3003/api
 @contentType = application/json
 
 ### Variables for tokens (replace with actual tokens after login)
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIyZWM2YmYzMS00M2RmLTRjZDAtYTIzYi03N2EyNDE0ZWZlNTMiLCJyb2xlIjoiQURNSU4iLCJzZXNzaW9uSWQiOiIyN2I1MjA2Ny1hZmVjLTQ2OGEtOTBhMS1jZmI2YTkzODA4ZmEiLCJpYXQiOjE3NDI1NjU0MTYsImV4cCI6MTc0MjU2OTAxNn0.I65BEJbA-Iftn7nXyi7RrDE6WFgS5AyWxzDk28IKdPY
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwZDYwY2Q5MC0yZjM1LTRjNTctODFmMy05NWM1MDM2YWFiNDciLCJyb2xlIjoiQURNSU4iLCJzZXNzaW9uSWQiOiI3OTZmNDUzZS04ZWE3LTRhNTgtODdkYy1hZWFlZWY2YmI3NTIiLCJpYXQiOjE3NDI4MjA2MDksImV4cCI6MTc0MjgyNDIwOX0.Ey-0U2CvlN4mHipZFprzaJxpebJEBdTQg568usEj3qU
 @customerToken = REPLACE_WITH_CUSTOMER_TOKEN
 @vendorToken = REPLACE_WITH_VENDOR_TOKEN
 
@@ -43,42 +43,90 @@ GET {{baseUrl}}/categories/d12a433f-52c8-4730-a93c-ed1e6af959e2/breadcrumb
 
 ### ADMIN-ONLY ROUTES ###
 
-### Create a new category
+### Create a new category with image upload
 POST {{baseUrl}}/categories
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Authorization: Bearer {{adminToken}}
 
-{
-  "name": "ECU & TCU",
-  "description": "All ECU and TCU module components",
-  "image": "https://example.com/images/categories/brakes-suspension.jpg",
-  "parentId": null,
-  "commissionRate": 8.5
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
 
-### Create a subcategory
+Performance Tuning
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="description"
+
+Aftermarket performance parts and accessories
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="parentId"
+
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="commissionRate"
+
+7.5
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="category-image.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/r32.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Create a subcategory with image upload
 POST {{baseUrl}}/categories
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Authorization: Bearer {{adminToken}}
 
-{
-  "name": "Brake Pads",
-  "description": "High-quality brake pads for all vehicle types",
-  "image": "https://example.com/images/categories/brake-pads.jpg",
-  "parentId": "9b81a726-c9e9-4290-99bb-a49466e03af0",
-  "commissionRate": 7.5
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
 
-### Update a category
-# Replace :categoryId with an actual category ID
+Brake Systems
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="description"
+
+High-performance brake systems and components
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="parentId"
+
+9b81a726-c9e9-4290-99bb-a49466e03af0
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="commissionRate"
+
+6.5
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="brake-systems.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/supra.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Update a category with image upload
+PUT {{baseUrl}}/categories/9b81a726-c9e9-4290-99bb-a49466e03af0
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{adminToken}}
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
+
+Stage 1 Software Tuning
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="description"
+
+Air intake, exhaust, and ECU tuning
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="updated-image.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/r32.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Update category without image (keeps existing image)
 PUT {{baseUrl}}/categories/77ff2aad-1b6c-477a-8966-383e03d9e68a
 Content-Type: {{contentType}}
 Authorization: Bearer {{adminToken}}
 
 {
   "name": "Stage 1 Software Tuning",
-  "description": "Air intake, exhaust, and ECU tuning",
-  "image": "https://example.com/images/categories/brakes-suspension-updated.jpg"
+  "description": "Updated description without changing the image"
 }
 
 ### Update commission rate
@@ -95,25 +143,3 @@ Authorization: Bearer {{adminToken}}
 # Replace :categoryId with an actual category ID
 DELETE {{baseUrl}}/categories/77ff2aad-1b6c-477a-8966-383e03d9e68a
 Authorization: Bearer {{adminToken}}
-
-### ACCESS CONTROL TESTS ###
-
-### Try to create a category with customer token (should fail with 403)
-POST {{baseUrl}}/categories
-Content-Type: {{contentType}}
-Authorization: Bearer {{customerToken}}
-
-{
-  "name": "Test Category",
-  "description": "This should fail"
-}
-
-### Try to update a category with vendor token (should fail with 403)
-# Replace :categoryId with an actual category ID
-PUT {{baseUrl}}/categories/:categoryId
-Content-Type: {{contentType}}
-Authorization: Bearer {{vendorToken}}
-
-{
-  "name": "This should fail"
-}

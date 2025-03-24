@@ -1,8 +1,8 @@
-@baseUrl = http://localhost:3000/api
+@baseUrl = http://localhost:3003/api
 @contentType = application/json
 
 ### Variables for tokens (replace with actual tokens after login)
-@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJlYjhjZTE0ZS0wZmZhLTQzZTMtYTc4Ny1lZTllOThkZGZjNDkiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiJjYzcxYzUzYS05ZWI0LTRjMzEtOTU4MS05ODljZjJhMjNkMTMiLCJpYXQiOjE3NDI1MTYwNzksImV4cCI6MTc0MjUxOTY3OX0.fYH2UncST2_7y5kDPOdLCkVluxkE8rabKHOL7Tt2LAY
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiI5ZGZjYzcwMC0xNWI3LTRlZWMtOWVkNi00MWZiYzYyYTY1OGEiLCJpYXQiOjE3NDI4MjQ4MDEsImV4cCI6MTc0MjgyODQwMX0.Lz9PcKU4D9XeOHAowEXQ9LIrmTCPSjEEa8CBF22GeqY
 @vendorToken = REPLACE_WITH_VENDOR_TOKEN
 @driverToken = REPLACE_WITH_DRIVER_TOKEN
 @adminToken = REPLACE_WITH_ADMIN_TOKEN
@@ -13,16 +13,25 @@
 GET {{baseUrl}}/customers/profile
 Authorization: Bearer {{customerToken}}
 
-### Update customer profile
+### Update customer profile with image upload
 PUT {{baseUrl}}/customers/profile
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Authorization: Bearer {{customerToken}}
 
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "profileImage": "https://example.com/profile-images/johndoe.jpg"
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="firstName"
+
+John
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lastName"
+
+Doe1
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="profileImage"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/bmw.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### ORDER MANAGEMENT ###
 
