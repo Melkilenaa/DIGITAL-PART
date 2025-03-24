@@ -10,14 +10,13 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "seed": "ts-node src/seeders/main.seeder.ts",
-  "seed:clean": "ts-node src/seeders/main.seeder.ts --clean",
-  "seed:auth": "ts-node src/seeders/auth.seeder.ts",
-  "seed:user": "ts-node src/seeders/user.seeder.ts",
-  "seed:category": "ts-node src/seeders/category.seeder.ts",
-  "seed:part": "ts-node src/seeders/part.seeder.ts",
-  "seed:auth:clean": "ts-node src/seeders/auth.seeder.ts ",
-  "seed:user:clean": "ts-node src/seeders/user.seeder.ts --clean"
-
+    "seed:clean": "ts-node src/seeders/main.seeder.ts --clean",
+    "seed:auth": "ts-node src/seeders/auth.seeder.ts",
+    "seed:user": "ts-node src/seeders/user.seeder.ts",
+    "seed:category": "ts-node src/seeders/category.seeder.ts",
+    "seed:part": "ts-node src/seeders/part.seeder.ts",
+    "seed:auth:clean": "ts-node src/seeders/auth.seeder.ts ",
+    "seed:user:clean": "ts-node src/seeders/user.seeder.ts --clean"
   },
   "keywords": [],
   "author": "",
@@ -35,12 +34,15 @@
     "express": "^4.21.2",
     "json-server": "^1.0.0-beta.3",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.9",
     "ts-node": "^10.9.2",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
+    "@types/multer": "^1.4.12",
     "typescript": "^5.8.2"
   }
 }

@@ -1,69 +1,184 @@
-@baseUrl = http://localhost:3000/api/auth
+@baseUrl = http://localhost:3003/api/auth
 @contentType = application/json
-@adminAccessToken = 
+@adminAccessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwZDYwY2Q5MC0yZjM1LTRjNTctODFmMy05NWM1MDM2YWFiNDciLCJyb2xlIjoiQURNSU4iLCJzZXNzaW9uSWQiOiJkNjE4MDdlMi01Mzc5LTRiZDQtODQxNi1lNGQ5MTRmMjRjZGMiLCJpYXQiOjE3NDI4MTU5ODYsImV4cCI6MTc0MjgxOTU4Nn0.hN8sJfnx6Gk8czSi9q_fKG63q6JxOuaPYeRX3wmgmzY
+@customerAccessToken = 
+@vendorAccessToken = 
+@driverAccessToken = 
 
-### Customer Registration
+### Customer Registration with Profile Image
 POST {{baseUrl}}/register/customer
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "customer@example.com",
-  "phone": "1234567890",
-  "password": "Password123!",
-  "profileImage": "https://example.com/profile.jpg"
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="firstName"
 
-### Vendor Registration
+John
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lastName"
+
+Doe11
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="email"
+
+customer@autoparts.com
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="phone"
+
++254112272250
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="password"
+
+Password123!
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="profileImage"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/r32.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Vendor Registration with Business Logo
 POST {{baseUrl}}/register/vendor
-Content-Type: {{contentType}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
-{
-  "businessName": "AutoParts Plus",
-  "businessLogo": "https://example.com/logo.png",
-  "businessDescription": "High quality automotive parts for all brands",
-  "phoneNumber": "2345678901",
-  "email": "vendor@example.com",
-  "password": "Password123!",
-  "address": "123 Main Street",
-  "city": "Lagos",
-  "state": "Lagos State",
-  "country": "Nigeria",
-  "postalCode": "100001",
-  "latitude": 6.5244,
-  "longitude": 3.3792,
-  "operatingHours": {
-    "monday": { "open": "08:00", "close": "18:00" },
-    "tuesday": { "open": "08:00", "close": "18:00" },
-    "wednesday": { "open": "08:00", "close": "18:00" },
-    "thursday": { "open": "08:00", "close": "18:00" },
-    "friday": { "open": "08:00", "close": "18:00" },
-    "saturday": { "open": "09:00", "close": "15:00" },
-    "sunday": { "open": "closed", "close": "closed" }
-  },
-  "specializations": ["Engine Parts", "Brake Systems", "Electrical Components"],
-  "certifications": ["ISO Certified", "Automotive Service Excellence"]
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="businessName"
 
-### Driver Registration
+AutoParts Premium
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="businessDescription"
+
+High quality automotive parts for all brands
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="phoneNumber"
+
+2345678901
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="email"
+
+vendor@example12.com
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="password"
+
+Password123!
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="address"
+
+123 Main Street
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="city"
+
+Lagos
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="state"
+
+Lagos State
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="country"
+
+Nigeria
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="postalCode"
+
+100001
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="latitude"
+
+6.5244
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="longitude"
+
+3.3792
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="operatingHours"
+
+{"monday":{"open":"08:00","close":"18:00"},"tuesday":{"open":"08:00","close":"18:00"},"wednesday":{"open":"08:00","close":"18:00"},"thursday":{"open":"08:00","close":"18:00"},"friday":{"open":"08:00","close":"18:00"},"saturday":{"open":"09:00","close":"15:00"},"sunday":{"open":"closed","close":"closed"}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="specializations"
+
+["Engine Parts","Brake Systems","Electrical Components"]
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="certifications"
+
+["ISO Certified","Automotive Service Excellence"]
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="businessLogo"; filename="logo.png"
+Content-Type: image/png
+
+< /home/user/Downloads/supra.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Driver Registration with Document Uploads
 POST {{baseUrl}}/register/driver
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="firstName"
+
+Michael
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lastName"
+
+Johnson
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="phoneNumber"
+
++273456789012
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="email"
+
+driver@example1.com
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="password"
+
+Password123!
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="vehicleType"
+
+Motorcycle
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="vehicleColor"
+
+Black
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="licensePlate"
+
+ABC123
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="profileImage"; filename="driver-profile.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/supra.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="drivingLicense"; filename="driving-license.pdf"
+Content-Type: application/pdf
+
+< /home/user/Downloads/guide.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="insuranceDocument"; filename="insurance.pdf"
+Content-Type: application/pdf
+
+< /home/user/Downloads/Pricing_Proposal.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="identificationDoc"; filename="id-document.pdf"
+Content-Type: application/pdf
+
+< /home/user/Downloads/Pricing_Proposal.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Create new admin (must be performed by existing super admin)
+POST {{baseUrl}}/register/admin
 Content-Type: {{contentType}}
+Authorization: Bearer {{adminAccessToken}}
 
 {
-  "firstName": "Michael",
-  "lastName": "Johnson",
-  "phoneNumber": "3456789012",
-  "email": "driver@example.com",
-  "password": "Password123!",
-  "profileImage": "https://example.com/driver-profile.jpg",
-  "vehicleType": "Motorcycle",
-  "vehicleColor": "Black",
-  "licensePlate": "ABC123",
-  "drivingLicense": "DL12345678",
-  "insuranceDocument": "https://example.com/insurance.pdf",
-  "identificationDoc": "https://example.com/id.pdf"
+  "firstName": "New",
+  "lastName": "Admin",
+  "email": "admin@example.com",
+  "password": "AdminPass456!",
+  "permissionLevel": "STANDARD"
 }
+
+### Login Requests (No file uploads)
 
 ### Login as Customer
 # @name loginCustomer
@@ -71,8 +186,8 @@ POST {{baseUrl}}/login
 Content-Type: {{contentType}}
 
 {
-  "email": "john@example.com",
-  "password": "Customer123!",
+  "email": "customer@example.com",
+  "password": "Password123!",
   "deviceInfo": {
     "token": "fcm-token-customer-device",
     "device": "iPhone 13 Pro",
@@ -90,8 +205,8 @@ POST {{baseUrl}}/login
 Content-Type: {{contentType}}
 
 {
-  "email": "autoparts@example.com",
-  "password": "Vendor123!",
+  "email": "vendor@example.com",
+  "password": "Password123!",
   "deviceInfo": {
     "token": "fcm-token-vendor-device",
     "device": "Samsung Galaxy S22",
@@ -113,7 +228,7 @@ Content-Type: {{contentType}}
   "password": "Password123!",
   "deviceInfo": {
     "token": "fcm-token-driver-device",
-    "device": "Xiaomi Redmi Note",
+    "device": "Xiaomi Redmi Note 10",
     "platform": "Android"
   }
 }
@@ -122,15 +237,50 @@ Content-Type: {{contentType}}
 @driverAccessToken = {{loginDriver.response.body.data.accessToken}}
 @driverRefreshToken = {{loginDriver.response.body.data.refreshToken}}
 
-### Validate customer token
-POST {{baseUrl}}/validate-token
+### Login as Admin
+# @name loginAdmin
+POST {{baseUrl}}/login
 Content-Type: {{contentType}}
 
 {
-  "token": "{{customerAccessToken}}"
+  "email": "superadmin@damps.com",
+  "password": "SuperAdmin123!",
+  "deviceInfo": {
+    "token": "fcm-token-admin-device",
+    "device": "MacBook Pro",
+    "platform": "macOS"
+  }
 }
 
-### Refresh customer token
+### Save admin tokens
+@adminAccessToken = {{loginAdmin.response.body.data.accessToken}}
+@adminRefreshToken = {{loginAdmin.response.body.data.refreshToken}}
+
+### Request Password Reset
+POST {{baseUrl}}/password/reset-request
+Content-Type: {{contentType}}
+
+{
+  "email": "customer@example.com"
+}
+
+### Reset Password (requires token from email)
+POST {{baseUrl}}/password/reset
+Content-Type: {{contentType}}
+
+{
+  "token": "reset-token-from-email",
+  "password": "NewPassword123!"
+}
+
+### Validate Token
+POST {{baseUrl}}/validate-token
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerAccessToken}}
+
+{}
+
+### Refresh Token
 POST {{baseUrl}}/refresh-token
 Content-Type: {{contentType}}
 
@@ -138,85 +288,11 @@ Content-Type: {{contentType}}
   "refreshToken": "{{customerRefreshToken}}"
 }
 
-### Request password reset
-POST {{baseUrl}}/password/reset-request
-Content-Type: {{contentType}}
-
-{
-  "emailOrPhone": "customer@example.com"
-}
-
-### Reset password (use token from previous response)
-POST {{baseUrl}}/password/reset
-Content-Type: {{contentType}}
-
-{
-  "token": "REPLACE_WITH_ACTUAL_RESET_TOKEN",
-  "newPassword": "NewPassword123!"
-}
-
-### Login with new password
-POST {{baseUrl}}/login
-Content-Type: {{contentType}}
-
-{
-  "email": "customer@example.com",
-  "password": "NewPassword123!"
-}
-
-### Logout (specific device)
+### Logout
 POST {{baseUrl}}/logout
 Content-Type: {{contentType}}
 Authorization: Bearer {{customerAccessToken}}
 
 {
   "deviceToken": "fcm-token-customer-device"
-}
-
-### Logout (all devices) - no device token specified
-POST {{baseUrl}}/logout
-Content-Type: {{contentType}}
-Authorization: Bearer {{vendorAccessToken}}
-
-{}
-
-### Admin registration (requires existing admin access)
-# @name loginAdmin
-POST {{baseUrl}}/login
-Content-Type: {{contentType}}
-
-{
-  "email": "admin@damps.com",
-  "password": "Admin123!"
-}
-
-### Create new admin (must be performed by existing super admin)
-POST {{baseUrl}}/register/admin
-Content-Type: {{contentType}}
-Authorization: Bearer {{adminAccessToken}}
-
-{
-  "firstName": "New",
-  "lastName": "Admin",
-  "email": "newadmin@example.com",
-  "password": "AdminPass456!",
-  "permissionLevel": "STANDARD"
-}
-
-### Invalid login attempt
-POST {{baseUrl}}/login
-Content-Type: {{contentType}}
-
-{
-  "email": "nonexistent@example.com",
-  "password": "WrongPassword123"
-}
-
-### Login by phone instead of email
-POST {{baseUrl}}/login
-Content-Type: {{contentType}}
-
-{
-  "phone": "1234567890",
-  "password": "Password123!"
 }

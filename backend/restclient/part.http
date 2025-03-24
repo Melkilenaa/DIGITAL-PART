@@ -99,7 +99,7 @@ Authorization: Bearer {{vendorToken}}
       "year": 2019,
       "makeModel": "Toyota|Camry",
       "makeModelYear": "Toyota|Camry|2019"
-    }
+    }   
   ],
   "weight": 2.5,
   "dimensions": "15x10x5 cm",

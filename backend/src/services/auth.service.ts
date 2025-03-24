@@ -34,6 +34,7 @@ interface VendorRegistrationDto extends RegisterUserDto {
   operatingHours: any; // JSON structure for operating hours
   specializations?: string[];
   certifications?: string[];
+  tags?: string[];
 }
 
 interface DriverRegistrationDto extends RegisterUserDto {
@@ -171,43 +172,91 @@ export class AuthService {
    * Register a vendor
    */
   async registerVendor(vendorData: VendorRegistrationDto): Promise<any> {
-    const user = await this.register({
-      ...vendorData,
-      role: UserRole.VENDOR,
-    });
-
-    const vendor = await this.prisma.vendor.create({
-      data: {
+    try {
+      // Validate the user doesn't already exist
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: vendorData.email }
+      });
+  
+      if (existingUser) {
+        throw new Error('User with this email already exists');
+      }
+  
+      // Hash the password
+      const hashedPassword = await bcryptjs.hash(vendorData.password, 10);
+  
+      // Create the user first
+      const user = await this.prisma.user.create({
+        data: {
+          email: vendorData.email,
+          phone: vendorData.phoneNumber,
+          password: hashedPassword,
+          role: UserRole.VENDOR,
+        }
+      });
+  
+      // Ensure the data types are correct before creating vendor
+      const vendorToCreate: any = {
         userId: user.id,
         businessName: vendorData.businessName,
         businessLogo: vendorData.businessLogo,
-        businessDescription: vendorData.businessDescription,
+        businessDescription: vendorData.businessDescription || '',
         phoneNumber: vendorData.phoneNumber,
         email: vendorData.email,
         address: vendorData.address,
         city: vendorData.city,
         state: vendorData.state,
         country: vendorData.country,
-        postalCode: vendorData.postalCode,
-        latitude: vendorData.latitude,
-        longitude: vendorData.longitude,
-        operatingHours: vendorData.operatingHours,
+        postalCode: vendorData.postalCode || '',
+        operatingHours: vendorData.operatingHours || {
+          monday: { open: "09:00", close: "17:00" },
+          tuesday: { open: "09:00", close: "17:00" },
+          wednesday: { open: "09:00", close: "17:00" },
+          thursday: { open: "09:00", close: "17:00" },
+          friday: { open: "09:00", close: "17:00" },
+          saturday: { open: "closed", close: "closed" },
+          sunday: { open: "closed", close: "closed" }
+        },
         specializations: vendorData.specializations || [],
         certifications: vendorData.certifications || [],
-        tags: [],
-      },
-      include: {
-        user: true,
-      },
-    });
-
-    // Log the registration
-    await this.logSystemAction('REGISTRATION', 'User', user.id, { role: 'VENDOR' });
-
-    return {
-      user: this.excludePassword(user),
-      vendor,
-    };
+        tags: vendorData.tags || []
+      };
+  
+      // Add optional fields only if they exist and are valid
+      if (vendorData.latitude !== undefined && vendorData.latitude !== null) {
+        vendorToCreate.latitude = typeof vendorData.latitude === 'string' 
+          ? parseFloat(vendorData.latitude) 
+          : vendorData.latitude;
+      }
+  
+      if (vendorData.longitude !== undefined && vendorData.longitude !== null) {
+        vendorToCreate.longitude = typeof vendorData.longitude === 'string' 
+          ? parseFloat(vendorData.longitude) 
+          : vendorData.longitude;
+      }
+  
+      // Create the vendor with all properly typed data
+      const vendor = await this.prisma.vendor.create({
+        data: vendorToCreate,
+        include: {
+          user: true
+        }
+      });
+  
+      return vendor;
+    } catch (error) {
+      // If user was created but vendor creation failed, delete the user to avoid orphaned records
+      if (error instanceof Error && error.message !== 'User with this email already exists') {
+        try {
+          await this.prisma.user.delete({
+            where: { email: vendorData.email }
+          });
+        } catch (deleteError) {
+          console.error('Failed to clean up user after vendor creation error:', deleteError);
+        }
+      }
+      throw error;
+    }
   }
 
   /**
@@ -217,6 +266,7 @@ export class AuthService {
     const user = await this.register({
       ...driverData,
       role: UserRole.DRIVER,
+      phone: driverData.phoneNumber
     });
 
     const driver = await this.prisma.driver.create({
@@ -274,6 +324,7 @@ export class AuthService {
         firstName: adminData.firstName,
         lastName: adminData.lastName,
         permissionLevel: adminData.permissionLevel as any || 'STANDARD',
+        
       },
       include: {
         user: true,
