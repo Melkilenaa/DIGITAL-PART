@@ -1,0 +1,131 @@
+@baseUrl = http://localhost:3003/api/promotions
+@contentType = application/json
+
+### Variables for tokens from auth.http
+@vendorToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiODUwMC0yNTMwLTQ1YzgtYmUzNC0yMzliZTM4OTM5NjUiLCJyb2xlIjoiVkVORE9SIiwic2Vzc2lvbklkIjoiY2Y4ZGU0Y2ItYjBjZi00ZTEzLWExYmUtODliZTllNTZlODE2IiwiaWF0IjoxNzQyODUxMTMzLCJleHAiOjE3NDI4NTQ3MzN9.e_USZ1LIxkM7TVKVQfpn8LVZyNoc2uJNwlXxeInCKWs
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiIwN2RhYWZjZS0xYTU4LTQ2YzctOTliMy0xZGUwYmQ4OWJhY2IiLCJpYXQiOjE3NDI4NTAwMjAsImV4cCI6MTc0Mjg1MzYyMH0.qR0-PMhZ1uovlWN8U5FqoKpTqbefh2O-zw9p5UtQzUY
+
+### Store a part ID and promotion ID for testing
+@partId = 56bf6889-848a-476b-bb23-92aeb976bfd4
+@promotionId = 3316961e-de6c-42e1-86cc-501478afd4f5
+
+### ---------- PROMOTION MANAGEMENT (VENDOR) ---------- ###
+
+### Create a new promotion (percentage discount)
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "name": "End of Month Sale",
+  "description": "Get 15% off on selected brake parts",
+  "type": "DISCOUNT",
+  "discountValue": 15,
+  "isPercentage": true,
+  "minimumOrderValue": 5000,
+  "startDate": "2025-03-25T00:00:00.000Z",
+  "endDate": "2025-03-31T23:59:59.999Z",
+  "promotionCode": "BRAKE15",
+  "partIds": ["56bf6889-848a-476b-bb23-92aeb976bfd4"]
+}
+
+### Create a new promotion (fixed amount)
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "name": "KES 1000 Off Filters",
+  "description": "Get KES 1000 off on all filters",
+  "type": "DISCOUNT",
+  "discountValue": 1000,
+  "isPercentage": false,
+  "minimumOrderValue": 3000,
+  "startDate": "2025-03-25T00:00:00.000Z",
+  "endDate": "2025-04-10T23:59:59.999Z",
+  "promotionCode": "FILTER1000"
+}
+
+### Create a new bundle promotion
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "name": "Buy 2 Get 1 Free",
+  "description": "Buy 2 oil filters and get 1 free",
+  "type": "BUNDLE",
+  "discountValue": 100,
+  "isPercentage": true,
+  "startDate": "2025-03-25T00:00:00.000Z",
+  "endDate": "2025-04-25T23:59:59.999Z",
+  "promotionCode": "B2G1FREE"
+}
+
+### Get vendor's promotions
+GET {{baseUrl}}/vendor?isActive=true
+Authorization: Bearer {{vendorToken}}
+
+### Get promotion by ID
+GET {{baseUrl}}/{{promotionId}}
+Authorization: Bearer {{vendorToken}}
+
+### Update a promotion
+PUT {{baseUrl}}/{{promotionId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "name": "Updated End of Month Sale",
+  "description": "Now 20% off on all brake parts!",
+  "discountValue": 20,
+  "endDate": "2025-04-05T23:59:59.999Z"
+}
+
+### Delete a promotion
+DELETE {{baseUrl}}/{{promotionId}}
+Authorization: Bearer {{vendorToken}}
+
+### Get promotion analytics
+GET {{baseUrl}}/{{promotionId}}/analytics
+Authorization: Bearer {{vendorToken}}
+
+### ---------- PROMOTION USAGE (CUSTOMER) ---------- ###
+
+### Get promotions for a part
+GET {{baseUrl}}/part/{{partId}}
+Authorization: Bearer {{customerToken}}
+
+### Validate a promotion code
+POST {{baseUrl}}/validate
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "code": "BRAKE15",
+  "vendorId": "d466d82c-6063-4644-b75f-fb0a0151c1d8",
+  "cartValue": 6000,
+  "partIds": ["{{partId}}"]
+}
+
+### Calculate discount for a cart
+POST {{baseUrl}}/calculate
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "promotionId": "{{promotionId}}",
+  "cartValue": 12000,
+  "cartItems": [
+    {
+      "partId": "{{partId}}",
+      "quantity": 2,
+      "price": 6000
+    },
+    {
+      "partId": "e5d4c3b2-a1b2-c3d4-e5f6-a7b8c9d0e1f2",
+      "quantity": 1,
+      "price": 3000
+    }
+  ]
+}

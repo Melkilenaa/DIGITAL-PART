@@ -7,6 +7,9 @@ import customerRoutes from './routes/customer.routes';
 import vehicleRoutes from './routes/vehicle.routes';
 import categoryRoutes from './routes/category.routes';
 import partRoutes from './routes/part.routes';
+import vendorRoutes from './routes/vendor.routes';
+import promotionRoutes from './routes/promotion.routes';
+import inventoryRoutes from './routes/inventory.routes';
 
 const cors = require('cors');
 const app = express();
@@ -22,5 +25,8 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/parts', partRoutes);
+app.use('/api/vendors', vendorRoutes);
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/promotions', promotionRoutes);
 
 export default app;

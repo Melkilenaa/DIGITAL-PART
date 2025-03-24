@@ -1,0 +1,204 @@
+@baseUrl = http://localhost:3003/api/inventory
+@contentType = application/json
+
+### Variables for tokens from auth.http
+@vendorToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiODUwMC0yNTMwLTQ1YzgtYmUzNC0yMzliZTM4OTM5NjUiLCJyb2xlIjoiVkVORE9SIiwic2Vzc2lvbklkIjoiY2Y4ZGU0Y2ItYjBjZi00ZTEzLWExYmUtODliZTllNTZlODE2IiwiaWF0IjoxNzQyODUxMTMzLCJleHAiOjE3NDI4NTQ3MzN9.e_USZ1LIxkM7TVKVQfpn8LVZyNoc2uJNwlXxeInCKWs
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiIwN2RhYWZjZS0xYTU4LTQ2YzctOTliMy0xZGUwYmQ4OWJhY2IiLCJpYXQiOjE3NDI4NTAwMjAsImV4cCI6MTc0Mjg1MzYyMH0.qR0-PMhZ1uovlWN8U5FqoKpTqbefh2O-zw9p5UtQzUY
+
+### Store a category ID for testing
+@categoryId = 6e2c7b1b-0f08-48b3-b050-16d115639fb5
+
+### Store a part ID for testing
+@partId = 56bf6889-848a-476b-bb23-92aeb976bfd4
+
+### ---------- PART MANAGEMENT ---------- ###
+
+### Create a new part
+POST {{baseUrl}}/parts
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "name": "High Performance Brake Pad Set",
+  "description": "Premium ceramic brake pads with low dust and noise. Compatible with most Japanese cars.",
+  "partNumber": "BP-2023-HP",
+  "barcode": "675890321456",
+  "price": 7500,
+  "condition": "NEW",
+  "brand": "BrakeMaster",
+  "stockQuantity": 50,
+  "lowStockAlert": 10,
+  "categoryId": "{{categoryId}}",
+  "specifications": {
+    "material": "Ceramic",
+    "position": "Front",
+    "warranty": "3 years",
+    "noiseDampening": true
+  },
+  "compatibleVehicles": [
+    {
+      "make": "Toyota",
+      "model": "Corolla",
+      "year": 2020
+    },
+    {
+      "make": "Honda",
+      "model": "Civic",
+      "year": 2019
+    },
+    {
+      "make": "Mazda",
+      "model": "3",
+      "year": 2021
+    }
+  ],
+  "weight": 2.5,
+  "dimensions": "15cm x 10cm x 2cm",
+  "tags": ["brakes", "ceramic", "performance", "low-dust"]
+}
+
+### Create a part with image upload
+POST {{baseUrl}}/parts
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{vendorToken}}
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
+
+Premium Oil Filter
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="description"
+
+Long-lasting premium oil filter for optimal engine protection
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="partNumber"
+
+OF-PM-2025
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="price"
+
+1200
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="stockQuantity"
+
+75
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="categoryId"
+
+{{categoryId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="brand"
+
+FilterPro
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="specifications"
+
+{"filterType":"Full-Flow","micronRating":"10","bypassValve":true}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="compatibleVehicles"
+
+[{"make":"Toyota","model":"Fortuner","year":2022},{"make":"Toyota","model":"Hilux","year":2021}]
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="images"; filename="oil_filter1.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/oil_filter1.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="images"; filename="oil_filter2.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/oil_filter2.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Update a part
+PUT {{baseUrl}}/parts/{{partId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "name": "Ultra High Performance Brake Pad Set",
+  "description": "Updated description with improved features",
+  "price": 8000,
+  "discountedPrice": 7200,
+  "stockQuantity": 45,
+  "tags": ["brakes", "ceramic", "high-performance", "low-dust", "quiet"]
+}
+
+### Delete a part
+DELETE {{baseUrl}}/parts/{{partId}}
+Authorization: Bearer {{vendorToken}}
+
+### ---------- STOCK MANAGEMENT ---------- ###
+
+### Update stock (add)
+PUT {{baseUrl}}/parts/{{partId}}/stock
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "quantity": 10,
+  "operation": "add",
+  "reason": "New shipment arrived"
+}
+
+### Update stock (subtract)
+PUT {{baseUrl}}/parts/{{partId}}/stock
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "quantity": 5,
+  "operation": "subtract",
+  "reason": "Damaged inventory"
+}
+
+### Update stock (set)
+PUT {{baseUrl}}/parts/{{partId}}/stock
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "quantity": 50,
+  "operation": "set",
+  "reason": "Inventory reconciliation after audit"
+}
+
+### Get low stock alerts
+GET {{baseUrl}}/low-stock
+Authorization: Bearer {{vendorToken}}
+
+### ---------- BULK OPERATIONS ---------- ###
+
+### Bulk import parts from CSV
+POST {{baseUrl}}/bulk-import
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{vendorToken}}
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="updateExisting"
+
+true
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="matchBy"
+
+partNumber
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="categoryId"
+
+{{categoryId}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="csvFile"; filename="inventory_import.csv"
+Content-Type: text/csv
+
+< /home/user/Downloads/inventory_import.csv
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Export inventory to CSV
+GET {{baseUrl}}/export?isActive=true&categoryId={{categoryId}}
+Authorization: Bearer {{vendorToken}}
+
+### ---------- INVENTORY REPORTING ---------- ###
+
+### Get inventory valuation
+GET {{baseUrl}}/valuation
+Authorization: Bearer {{vendorToken}}

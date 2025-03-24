@@ -1,0 +1,136 @@
+@baseUrl = http://localhost:3003/api/vendors
+@contentType = application/json
+
+### Variables for tokens from auth.http
+@vendorToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkNDY2ZDgyYy02MDYzLTQ2NDQtYjc1Zi1mYjBhMDE1MWMxZDgiLCJyb2xlIjoiVkVORE9SIiwic2Vzc2lvbklkIjoiMWNlNWQ5MmMtYjg0ZC00MjA5LTkwMTUtODNlYzBkOTY5ZWZlIiwiaWF0IjoxNzQyODQ5OTEyLCJleHAiOjE3NDI4NTM1MTJ9.4OfwlKWS6NDPQwHD2mMfNhGzudSU6Kxr0_L96-nauTA
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiIwN2RhYWZjZS0xYTU4LTQ2YzctOTliMy0xZGUwYmQ4OWJhY2IiLCJpYXQiOjE3NDI4NTAwMjAsImV4cCI6MTc0Mjg1MzYyMH0.qR0-PMhZ1uovlWN8U5FqoKpTqbefh2O-zw9p5UtQzUY
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwZDYwY2Q5MC0yZjM1LTRjNTctODFmMy05NWM1MDM2YWFiNDciLCJyb2xlIjoiQURNSU4iLCJzZXNzaW9uSWQiOiIyYzFhODA1Ny04YmMyLTQwZTUtODgwMi00YzFhZWEzNTYzYzciLCJpYXQiOjE3NDI4MzA1NTYsImV4cCI6MTc0MjgzNDE1Nn0.ufxE6M4_pTxfokXkUyWcDpAmuZ3ReKi_iUKtlZ-QPHQ
+
+### Store a vendor ID for testing
+@vendorId = 54018734-7112-41b3-b4bb-d3655a3db733
+
+### ---------- PUBLIC VENDOR INFO ---------- ###
+
+### Get vendor public profile
+GET {{baseUrl}}/public/{{vendorId}}
+
+### Get vendor reviews (public)
+GET {{baseUrl}}/public/{{vendorId}}/reviews
+
+### Get vendor rating summary (public)
+GET {{baseUrl}}/public/{{vendorId}}/rating
+
+### ---------- VENDOR PROFILE MANAGEMENT ---------- ###
+
+### Get own vendor profile (vendor only)
+GET {{baseUrl}}/profile
+Authorization: Bearer {{vendorToken}}
+
+### Update vendor profile (JSON)
+PUT {{baseUrl}}/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "businessName": "Premium Auto Parts Supply",
+  "businessDescription": "Specialized in high-quality automotive parts for all major brands",
+  "phoneNumber": "+254712345678",
+  "email": "contact@premimautoparts.com",
+  "address": "123 Ngong Road",
+  "city": "Nairobi",
+  "state": "Nairobi County",
+  "country": "Kenya",
+  "postalCode": "00100",
+  "latitude": -1.286389,
+  "longitude": 36.817223,
+  "tags": ["premium", "auto parts", "quick delivery", "warranty"]
+}
+
+### Update vendor profile with image upload
+PUT {{baseUrl}}/profile
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{vendorToken}}
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="businessName"
+
+Premium Auto Parts Supply
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="businessDescription"
+
+Specialized in high-quality automotive parts with 3-year warranty
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="address"
+
+123 Ngong Road, Nairobi
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="businessLogo"; filename="logo.jpg"
+Content-Type: image/jpeg
+
+< /home/user/Downloads/logo.jpeg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Update operating hours
+PUT {{baseUrl}}/operating-hours
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "monday": { "open": "08:00", "close": "18:00" },
+  "tuesday": { "open": "08:00", "close": "18:00" },
+  "wednesday": { "open": "08:00", "close": "18:00" },
+  "thursday": { "open": "08:00", "close": "18:00" },
+  "friday": { "open": "08:00", "close": "18:00" },
+  "saturday": { "open": "09:00", "close": "15:00" },
+  "sunday": { "open": "closed", "close": "closed" }
+}
+
+### Update special holidays
+PUT {{baseUrl}}/special-holidays
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "2025-01-01": { "isOpen": false, "note": "New Year's Day" },
+  "2025-04-18": { "isOpen": false, "note": "Good Friday" },
+  "2025-05-01": { "isOpen": false, "note": "Labor Day" },
+  "2025-12-25": { "isOpen": false, "note": "Christmas Day" },
+  "2025-12-26": { "isOpen": false, "note": "Boxing Day" }
+}
+
+### ---------- VERIFICATION DOCUMENTS ---------- ###
+
+### Submit verification documents
+POST {{baseUrl}}/verification/documents
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{vendorToken}}
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="documentType"
+
+BUSINESS_LICENSE
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="description"
+
+Business operating license issued by Nairobi County
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="notes"
+
+Please review at your earliest convenience
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="documents"; filename="license.pdf"
+Content-Type: application/pdf
+
+< /home/user/Downloads/license.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="documents"; filename="tax_certificate.pdf"
+Content-Type: application/pdf
+
+< /home/user/Downloads/tax_certificate.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### ---------- PERFORMANCE METRICS ---------- ###
+
+### Get vendor performance metrics
+GET {{baseUrl}}/metrics?startDate=2025-01-01&endDate=2025-03-24&groupBy=month
+Authorization: Bearer {{vendorToken}}
