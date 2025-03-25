@@ -319,6 +319,98 @@ export class VendorController {
   }
 
   /**
+ * Get vendor banking details
+ */
+async getVendorBankingDetails(req: Request, res: Response): Promise<void> {
+  try {
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+      return;
+    }
+    
+    // Get vendor ID from user ID
+    const vendor = await vendorService.getVendorProfile(userId);
+    
+    // Get banking details
+    const bankingDetails = await vendorService.getVendorBankingDetails(vendor.id);
+    
+    res.status(200).json({
+      success: true,
+      data: bankingDetails,
+    });
+  } catch (error: any) {
+    const statusCode = error instanceof NotFoundException ? 404 : 500;
+    
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to get banking details',
+    });
+  }
+}
+
+/**
+ * Update vendor banking details
+ */
+async updateVendorBankingDetails(req: Request, res: Response): Promise<void> {
+  try {
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+      return;
+    }
+    
+    // Get vendor ID from user ID
+    const vendor = await vendorService.getVendorProfile(userId);
+    
+    // Validate input
+    const { bankName, bankAccountName, bankAccountNumber } = req.body;
+    
+    if (!bankName || !bankAccountName || !bankAccountNumber) {
+      res.status(400).json({
+        success: false,
+        message: 'Bank name, account name, and account number are all required',
+      });
+      return;
+    }
+    
+    // Update banking details
+    const updatedVendor = await vendorService.updateVendorBankingDetails(vendor.id, {
+      bankName,
+      bankAccountName,
+      bankAccountNumber,
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Banking details updated successfully',
+      data: {
+        bankName: updatedVendor.bankName,
+        bankAccountName: updatedVendor.bankAccountName,
+        bankAccountNumber: updatedVendor.bankAccountNumber,
+        isPayoutEnabled: updatedVendor.isPayoutEnabled,
+      },
+    });
+  } catch (error: any) {
+    const statusCode = error instanceof NotFoundException ? 404 : 
+                      error instanceof BadRequestException ? 400 : 500;
+                      
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to update banking details',
+    });
+  }
+}
+
+  /**
    * Get vendor rating summary
    */
   async getVendorRatingSummary(req: Request, res: Response): Promise<void> {

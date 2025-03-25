@@ -23,6 +23,10 @@ router.use(roleGuard([UserRole.VENDOR, UserRole.ADMIN]));
 router.get('/profile', vendorController.getVendorProfile);
 router.put('/profile', upload.single('businessLogo'), vendorController.updateVendorProfile);
 
+// Banking details management
+router.get('/banking-details', vendorController.getVendorBankingDetails);
+router.put('/banking-details', vendorController.updateVendorBankingDetails);
+
 // Operating hours and special holidays
 router.put('/operating-hours', vendorController.updateOperatingHours);
 router.put('/special-holidays', vendorController.updateSpecialHolidays);

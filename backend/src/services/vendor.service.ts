@@ -20,6 +20,10 @@ interface VendorProfileUpdateDto {
   specializations?: string[];
   certifications?: string[];
   tags?: string[];
+  // Banking details
+  bankName?: string;
+  bankAccountName?: string;
+  bankAccountNumber?: string;
 }
 
 interface OperatingHoursDto {
@@ -111,7 +115,77 @@ export class VendorService {
       throw new BadRequestException(`Failed to update vendor profile: ${error.message}`);
     }
   }
+/**
+ * Update vendor banking details
+ */
+async updateVendorBankingDetails(vendorId: string, data: {
+  bankName: string;
+  bankAccountName: string;
+  bankAccountNumber: string;
+}): Promise<Vendor> {
+  try {
+    // Validate input data
+    if (!data.bankName || !data.bankAccountName || !data.bankAccountNumber) {
+      throw new BadRequestException('Bank name, account name, and account number are all required');
+    }
 
+    // Find the vendor
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { id: vendorId },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    // Update banking details
+    return await this.prisma.vendor.update({
+      where: { id: vendorId },
+      data: {
+        bankName: data.bankName,
+        bankAccountName: data.bankAccountName,
+        bankAccountNumber: data.bankAccountNumber,
+        isPayoutEnabled: true, // Enable payouts automatically when banking details are set
+      },
+    });
+  } catch (error: any) {
+    if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      throw error;
+    }
+    throw new BadRequestException(`Failed to update banking details: ${error.message}`);
+  }
+}
+
+/**
+ * Get vendor banking details
+ */
+async getVendorBankingDetails(vendorId: string): Promise<any> {
+  try {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { id: vendorId },
+      select: {
+        bankName: true,
+        bankAccountName: true,
+        bankAccountNumber: true,
+        isPayoutEnabled: true,
+        totalEarnings: true,
+        totalPaidOut: true,
+        lastPayoutDate: true,
+      },
+    });
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    return vendor;
+  } catch (error: any) {
+    if (error instanceof NotFoundException) {
+      throw error;
+    }
+    throw new BadRequestException(`Failed to get banking details: ${error.message}`);
+  }
+}
   /**
    * Update vendor operating hours
    */

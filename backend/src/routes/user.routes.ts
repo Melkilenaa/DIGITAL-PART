@@ -12,11 +12,13 @@ router.use(authMiddleware);
 
 // Profile management routes
 router.get('/profile', userController.getUserProfile.bind(userController));
-// Add upload middleware for profile updates to handle image uploads
 router.put('/profile', upload.single('profileImage'), userController.updateProfile.bind(userController));
 
 // Account settings routes
 router.put('/account/settings', userController.updateAccountSettings.bind(userController));
+
+// Banking details management (for vendors and drivers)
+router.put('/banking-details', userController.updateBankingDetails.bind(userController));
 
 // Device token management
 router.get('/device-tokens', userController.getUserDeviceTokens.bind(userController));

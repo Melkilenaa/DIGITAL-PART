@@ -22,6 +22,10 @@ interface UpdateProfileDto {
   operatingHours?: any;
   specializations?: string[];
   certifications?: string[];
+  // Banking details for vendors/drivers
+  bankName?: string;
+  bankAccountName?: string;
+  bankAccountNumber?: string;
   // For drivers
   vehicleType?: string;
   vehicleColor?: string;
@@ -267,6 +271,20 @@ export class UserService {
     if (data.operatingHours) updateData.operatingHours = data.operatingHours;
     if (data.specializations) updateData.specializations = data.specializations;
     if (data.certifications) updateData.certifications = data.certifications;
+    if (data.bankName) updateData.bankName = data.bankName;
+    if (data.bankAccountName) updateData.bankAccountName = data.bankAccountName;
+    if (data.bankAccountNumber) updateData.bankAccountNumber = data.bankAccountNumber;
+    
+    if (data.bankName || data.bankAccountName || data.bankAccountNumber) {
+      // Enable payouts if all banking fields are present
+      if (
+        (data.bankName || vendor.bankName) && 
+        (data.bankAccountName || vendor.bankAccountName) && 
+        (data.bankAccountNumber || vendor.bankAccountNumber)
+      ) {
+        updateData.isPayoutEnabled = true;
+      }
+    }
 
     const updatedVendor = await this.prisma.vendor.update({
       where: { userId: data.userId },
@@ -301,6 +319,20 @@ export class UserService {
     if (data.vehicleType) updateData.vehicleType = data.vehicleType;
     if (data.vehicleColor) updateData.vehicleColor = data.vehicleColor;
     if (data.licensePlate) updateData.licensePlate = data.licensePlate;
+    if (data.bankName) updateData.bankName = data.bankName;
+    if (data.bankAccountName) updateData.bankAccountName = data.bankAccountName;
+    if (data.bankAccountNumber) updateData.bankAccountNumber = data.bankAccountNumber;
+    
+    if (data.bankName || data.bankAccountName || data.bankAccountNumber) {
+      // Enable payouts if all banking fields are present
+      if (
+        (data.bankName || driver.bankName) && 
+        (data.bankAccountName || driver.bankAccountName) && 
+        (data.bankAccountNumber || driver.bankAccountNumber)
+      ) {
+        updateData.isPayoutEnabled = true;
+      }
+    }
 
     const updatedDriver = await this.prisma.driver.update({
       where: { userId: data.userId },
@@ -393,6 +425,8 @@ export class UserService {
       updateData.phone = data.phone;
     }
 
+    
+
     // Handle password update
     if (data.password) {
       // Verify old password if provided
@@ -451,7 +485,78 @@ export class UserService {
       preferences: preferencesToUpdate,
     };
   }
+/**
+ * Update banking details for a user
+ */
+async updateBankingDetails(userId: string, data: {
+  bankName: string;
+  bankAccountName: string;
+  bankAccountNumber: string;
+}): Promise<any> {
+  const user = await this.prisma.user.findUnique({
+    where: { id: userId },
+  });
 
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Validate all required banking fields are provided
+  if (!data.bankName || !data.bankAccountName || !data.bankAccountNumber) {
+    throw new Error('Bank name, account name, and account number are all required');
+  }
+
+  let result;
+  
+  // Update banking details based on user role
+  if (user.role === UserRole.VENDOR) {
+    const vendor = await this.prisma.vendor.findUnique({
+      where: { userId },
+    });
+    
+    if (!vendor) {
+      throw new Error('Vendor profile not found');
+    }
+    
+    result = await this.prisma.vendor.update({
+      where: { userId },
+      data: {
+        bankName: data.bankName,
+        bankAccountName: data.bankAccountName, 
+        bankAccountNumber: data.bankAccountNumber,
+        isPayoutEnabled: true,
+      },
+    });
+  } else if (user.role === UserRole.DRIVER) {
+    const driver = await this.prisma.driver.findUnique({
+      where: { userId },
+    });
+    
+    if (!driver) {
+      throw new Error('Driver profile not found');
+    }
+    
+    result = await this.prisma.driver.update({
+      where: { userId },
+      data: {
+        bankName: data.bankName,
+        bankAccountName: data.bankAccountName,
+        bankAccountNumber: data.bankAccountNumber,
+        isPayoutEnabled: true,
+      },
+    });
+  } else {
+    throw new Error('Banking details can only be updated for vendors and drivers');
+  }
+
+  await this.logSystemAction('BANKING_DETAILS_UPDATE', user.role === UserRole.VENDOR ? 'Vendor' : 'Driver', 
+    result.id, {
+      updatedFields: ['bankName', 'bankAccountName', 'bankAccountNumber']
+    }
+  );
+
+  return result;
+}
   /**
    * Manage user permissions (admin only)
    */

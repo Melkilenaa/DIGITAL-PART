@@ -58,8 +58,19 @@ export class AuthController {
         vendorData.businessLogo = req.file.path;
       }
       
+
+       // Validations for banking info if provided
+    if (vendorData.bankAccountNumber && (!vendorData.bankName || !vendorData.bankAccountName)) {
+      res.status(400).json({
+        success: false,
+        message: 'If providing banking details, bank name and account name are required'
+      });
+      return;
+    }
       // Convert string values to appropriate types for Prisma model
       
+
+
       // 1. Parse latitude and longitude as floats
       if (vendorData.latitude && typeof vendorData.latitude === 'string') {
         vendorData.latitude = parseFloat(vendorData.latitude);

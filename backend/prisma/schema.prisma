@@ -200,6 +200,19 @@ model Vendor {
   promotions        Promotion[]
   reviews           Review[]
 
+  bankName          String?
+  bankAccountName   String?
+  bankAccountNumber String?
+
+  totalEarnings     Float             @default(0)
+  totalPaidOut      Float             @default(0)
+  lastPayoutDate    DateTime?
+  isPayoutEnabled   Boolean           @default(false)
+  
+  // Payout Requests Relation
+  payoutRequests    PayoutRequest[]
+  
+
   @@index([userId])
   @@index([businessName])
   @@index([city, state])
@@ -236,6 +249,19 @@ model Driver {
   updatedAt         DateTime          @updatedAt
   deliveries        Delivery[]
   earnings          DriverEarning[]
+
+  bankName          String?
+  bankAccountName   String?
+  bankAccountNumber String?
+
+  totalEarnings     Float             @default(0)
+  totalPaidOut      Float             @default(0)
+  lastPayoutDate    DateTime?
+  isPayoutEnabled   Boolean           @default(false)
+  
+  // Payout Requests Relation
+  payoutRequests    PayoutRequest[]
+  
 
   @@index([userId])
   @@index([isVerified, isAvailable])
@@ -274,6 +300,7 @@ model Admin {
   systemConfigs     SystemConfig[]
   
   @@index([userId])
+  PayoutRequest PayoutRequest[]
 }
 
 enum AdminPermission {
@@ -564,6 +591,8 @@ model Transaction {
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   refunds           Refund[]
+  payoutRequest     PayoutRequest?
+
   
   @@index([reference])
   @@index([type])
@@ -701,4 +730,50 @@ model SystemLog {
   @@index([entityType, entityId])
   @@index([performedById])
   @@index([createdAt])
+}
+
+model PayoutRequest {
+  id                String            @id @default(uuid())
+  userId            String            // Vendor or Driver ID
+  userType          PayoutUserType
+  amount            Float             // Requested payout amount
+  status            PayoutStatus      @default(PENDING)
+  
+  // Banking Details
+  bankName          String
+  bankAccountName   String
+  bankAccountNumber String
+  
+  // Audit and Tracking
+  createdAt         DateTime          @default(now())
+  processedAt       DateTime?
+  processedById     String?           // Admin who processed the request
+  processedBy       Admin?            @relation(fields: [processedById], references: [id])
+  
+  // Additional Details
+  requestedEarnings Json?             // Detailed breakdown of earnings
+  notes             String?           // Optional admin notes
+   vendorId          String?
+  vendor            Vendor?           @relation(fields: [vendorId], references: [id])
+  driverId          String?
+  driver            Driver?           @relation(fields: [driverId], references: [id])
+  transactionId     String?           @unique
+  transaction       Transaction?      @relation(fields: [transactionId], references: [id])
+  
+  @@index([userId])
+  @@index([userType])
+  @@index([status])
+
+}
+
+enum PayoutUserType {
+  VENDOR
+  DRIVER
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  PROCESSED
+  REJECTED
 }

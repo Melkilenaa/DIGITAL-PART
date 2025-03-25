@@ -375,7 +375,49 @@ export class UserController {
       });
     }
   }
+/**
+ * Update banking details
+ */
+async updateBankingDetails(req: Request, res: Response): Promise<void> {
+  try {
+    const userId = req.user?.userId;
+    
+    if (!userId) {
+      res.status(401).json({ message: 'Authentication required' });
+      return;
+    }
 
+    const { bankName, bankAccountName, bankAccountNumber } = req.body;
+    
+    // Validate all required fields
+    if (!bankName || !bankAccountName || !bankAccountNumber) {
+      res.status(400).json({ message: 'Bank name, account name, and account number are all required' });
+      return;
+    }
+
+    const result = await userService.updateBankingDetails(userId, {
+      bankName,
+      bankAccountName,
+      bankAccountNumber
+    });
+    
+    res.status(200).json({
+      message: 'Banking details updated successfully',
+      data: {
+        bankName: result.bankName,
+        bankAccountName: result.bankAccountName,
+        bankAccountNumber: result.bankAccountNumber,
+        isPayoutEnabled: result.isPayoutEnabled,
+      }
+    });
+  } catch (error: any) {
+    console.error('Banking details update error:', error);
+    res.status(400).json({
+      message: 'Failed to update banking details',
+      error: error.message
+    });
+  }
+}
   /**
    * Remove a device token
    */

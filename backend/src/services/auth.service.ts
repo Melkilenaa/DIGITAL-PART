@@ -35,6 +35,10 @@ interface VendorRegistrationDto extends RegisterUserDto {
   specializations?: string[];
   certifications?: string[];
   tags?: string[];
+  // New banking fields
+  bankName?: string;
+  bankAccountName?: string;
+  bankAccountNumber?: string;
 }
 
 interface DriverRegistrationDto extends RegisterUserDto {
@@ -48,6 +52,10 @@ interface DriverRegistrationDto extends RegisterUserDto {
   drivingLicense: string;
   insuranceDocument?: string;
   identificationDoc: string;
+  // New banking fields
+  bankName?: string;
+  bankAccountName?: string;
+  bankAccountNumber?: string;
 }
 
 interface AdminRegistrationDto extends RegisterUserDto {
@@ -282,6 +290,10 @@ export class AuthService {
         drivingLicense: driverData.drivingLicense,
         insuranceDocument: driverData.insuranceDocument,
         identificationDoc: driverData.identificationDoc,
+        // Add banking fields
+        bankName: driverData.bankName,
+        bankAccountName: driverData.bankAccountName,
+        bankAccountNumber: driverData.bankAccountNumber,
       },
       include: {
         user: true,

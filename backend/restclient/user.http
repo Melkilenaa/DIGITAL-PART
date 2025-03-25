@@ -215,6 +215,28 @@ Content-Type: image/jpeg
 < /home/user/Downloads/r32.jpeg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
+### Update vendor banking details
+PUT {{baseUrl}}/banking-details
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "bankName": "GTBank",
+  "bankAccountName": "Auto Parts Vendor Ltd",
+  "bankAccountNumber": "0987654321"
+}
+
+### Update driver banking details
+PUT {{baseUrl}}/banking-details
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "bankName": "Access Bank",
+  "bankAccountName": "John Driver",
+  "bankAccountNumber": "1122334455"
+}
+
 ### ---------- ADMIN FUNCTIONS ---------- ###
 
 ### Get specific user profile (admin only)

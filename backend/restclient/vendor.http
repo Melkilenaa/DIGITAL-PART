@@ -85,6 +85,23 @@ Authorization: Bearer {{vendorToken}}
   "sunday": { "open": "closed", "close": "closed" }
 }
 
+### ---------- BANKING DETAILS ---------- ###
+
+### Get vendor banking details
+GET {{baseUrl}}/banking-details
+Authorization: Bearer {{vendorToken}}
+
+### Update vendor banking details
+PUT {{baseUrl}}/banking-details
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "bankName": "Zenith Bank",
+  "bankAccountName": "Premium Auto Parts Ltd",
+  "bankAccountNumber": "1234567890"
+}
+
 ### Update special holidays
 PUT {{baseUrl}}/special-holidays
 Content-Type: {{contentType}}
