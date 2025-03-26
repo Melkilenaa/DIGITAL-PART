@@ -1,0 +1,151 @@
+@baseUrl = http://localhost:3000/api/deliveries
+@contentType = application/json
+@vendorToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiODUwMC0yNTMwLTQ1YzgtYmUzNC0yMzliZTM4OTM5NjUiLCJyb2xlIjoiVkVORE9SIiwic2Vzc2lvbklkIjoiY2Y4ZGU0Y2ItYjBjZi00ZTEzLWExYmUtODliZTllNTZlODE2IiwiaWF0IjoxNzQyODUxMTMzLCJleHAiOjE3NDI4NTQ3MzN9.e_USZ1LIxkM7TVKVQfpn8LVZyNoc2uJNwlXxeInCKWs
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiIwN2RhYWZjZS0xYTU4LTQ2YzctOTliMy0xZGUwYmQ4OWJhY2IiLCJpYXQiOjE3NDI4NTAwMjAsImV4cCI6MTc0Mjg1MzYyMH0.qR0-PMhZ1uovlWN8U5FqoKpTqbefh2O-zw9p5UtQzUY
+@driverToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3ZDhhYjVlMS1lMjVkLTRhYzQtYmQzNS0wMTY0MzE2YmVkMjAiLCJyb2xlIjoiRFJJVkVSIiwic2Vzc2lvbklkIjoiMDdkYWFmY2UtMWE1OC00NmM3LTk5YjMtMWRlMGJkODliYWNiIiwiaWF0IjoxNzQyODUwMDIwLCJleHAiOjE3NDI4NTM2MjB9.VxvpdBGj0nXMBhNIYefJmBzYLbN2jUhUL7fiJ-5lEE0
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YTJhYTg5Ny1iZDQ1LTRkMDktOGU1Ny1hNWMwYzBkYzRhZTQiLCJyb2xlIjoiQURNSU4iLCJzZXNzaW9uSWQiOiIwN2RhYWZjZS0xYTU4LTQ2YzctOTliMy0xZGUwYmQ4OWJhY2IiLCJpYXQiOjE3NDI4NTAwMjAsImV4cCI6MTc0Mjg1MzYyMH0.BzYlGgUMkKCf2vMz0YqqaTdgiYPG9SUTwvDVxuKYCps
+
+### ---------- VENDOR/ADMIN ENDPOINTS ---------- ###
+
+### Create a new delivery for an order (VENDOR)
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "orderId": "5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d"
+}
+
+### Create a new delivery (ADMIN)
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "orderId": "5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d"
+}
+
+### Get delivery details by ID
+GET {{baseUrl}}/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### Find available drivers for a delivery
+GET {{baseUrl}}/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d/available-drivers
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### Assign a driver to a delivery
+POST {{baseUrl}}/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d/assign-driver
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "driverId": "7d8ab5e1-e25d-4ac4-bd35-0164316bed20"
+}
+
+### Get delivery for an order
+GET {{baseUrl}}/order/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### ---------- DRIVER ENDPOINTS ---------- ###
+
+### Update delivery status to PICKUP_IN_PROGRESS
+PATCH {{baseUrl}}/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d/status
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "status": "PICKUP_IN_PROGRESS",
+  "latitude": 6.5244,
+  "longitude": 3.3792
+}
+
+### Update delivery status to PICKED_UP
+PATCH {{baseUrl}}/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d/status
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "status": "PICKED_UP",
+  "latitude": 6.5244,
+  "longitude": 3.3792
+}
+
+### Update delivery status to IN_TRANSIT
+PATCH {{baseUrl}}/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d/status
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "status": "IN_TRANSIT",
+  "latitude": 6.4899,
+  "longitude": 3.3978
+}
+
+### Update delivery status to ARRIVED
+PATCH {{baseUrl}}/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d/status
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "status": "ARRIVED",
+  "latitude": 6.4541,
+  "longitude": 3.4205
+}
+
+### Update delivery status to DELIVERED
+PATCH {{baseUrl}}/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d/status
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "status": "DELIVERED",
+  "latitude": 6.4541,
+  "longitude": 3.4205
+}
+
+### Submit proof of delivery
+POST {{baseUrl}}/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d/proof
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "proofUrl": "https://storage.googleapis.com/damps-images/delivery-proofs/proof-12345.jpg"
+}
+
+### Get deliveries for current driver
+GET {{baseUrl}}/my-deliveries
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### Get filtered deliveries for current driver
+GET {{baseUrl}}/my-deliveries?status=DELIVERED&startDate=2025-01-01&endDate=2025-03-31&limit=5&offset=0
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### ---------- CUSTOMER ENDPOINTS ---------- ###
+
+### Rate a delivery
+POST {{baseUrl}}/5a4b3c2d-1e0f-9a8b-7c6d-5e4f3a2b1c0d/rate
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "rating": 5,
+  "comment": "Excellent service! Driver was polite and delivery was prompt."
+}
+
+### ---------- ADMIN ENDPOINTS ---------- ###
+
+### Get all deliveries for a specific driver
+GET {{baseUrl}}/driver/7d8ab5e1-e25d-4ac4-bd35-0164316bed20
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+### Get filtered deliveries for a driver
+GET {{baseUrl}}/driver/7d8ab5e1-e25d-4ac4-bd35-0164316bed20?status=DELIVERED&startDate=2025-01-01&endDate=2025-03-31&limit=10&offset=0
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+

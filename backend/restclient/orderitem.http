@@ -1,0 +1,91 @@
+@baseUrl = http://localhost:3000/api/order-items
+@contentType = application/json
+@customerToken = REPLACE_WITH_CUSTOMER_TOKEN
+@vendorToken = REPLACE_WITH_VENDOR_TOKEN
+@adminToken = REPLACE_WITH_ADMIN_TOKEN
+
+### ---------- GET ENDPOINTS ---------- ###
+
+### Get all items for a given order
+GET {{baseUrl}}/ORDER_ID
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+### Get a specific order item by its item ID
+GET {{baseUrl}}/item/ITEM_ID
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+### ---------- POST ENDPOINTS ---------- ###
+
+### Add a new item to an order
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "orderId": "ORDER_ID",
+  "partId": "PART_ID",
+  "quantity": 2,
+  "notes": "Please add extra packaging if available."
+}
+
+### Apply promotion to order items
+POST {{baseUrl}}/ORDER_ID/apply-promotion
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "promotionCode": "PROMO2025"
+}
+
+### ---------- PATCH ENDPOINTS ---------- ###
+
+### Update quantity of an existing order item
+PATCH {{baseUrl}}/ORDER_ITEM_ID
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "quantity": 3
+}
+
+### ---------- DELETE ENDPOINTS ---------- ###
+
+### Remove an order item from an order
+DELETE {{baseUrl}}/ORDER_ITEM_ID
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+### ---------- CALCULATION ENDPOINT ---------- ###
+
+### Calculate totals for items in an order
+GET {{baseUrl}}/calculate/ORDER_ID
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+### ---------- ERROR CASES ---------- ###
+
+### Attempt to add an order item with missing required fields
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "orderId": "",
+  "partId": "",
+  "quantity": 0
+}
+
+### Attempt to update order item quantity with an invalid value
+PATCH {{baseUrl}}/ORDER_ITEM_ID
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "quantity": -1
+}
+
+### Attempt to remove an order item without proper authorization
+DELETE {{baseUrl}}/ORDER_ITEM_ID
+Content-Type: {{contentType}}

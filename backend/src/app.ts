@@ -12,6 +12,10 @@ import promotionRoutes from './routes/promotion.routes';
 import inventoryRoutes from './routes/inventory.routes';
 import payoutRoutes from './routes/payout.routes';
 import paymentRoutes from './routes/payment.routes';
+import orderRoutes from './routes/order.routes';
+import orderItemRoutes from './routes/orderitem.routes';
+import locationRoutes from './routes/location.routes';
+import deliveryRoutes from './routes/delivery.routes';
 
 const cors = require('cors');
 const app = express();
@@ -32,5 +36,9 @@ app.use('/api/inventory', inventoryRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/payouts', payoutRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/order-items', orderItemRoutes);
+app.use('/api/deliveries', deliveryRoutes);
+app.use('/api/locations', locationRoutes);
 
 export default app;

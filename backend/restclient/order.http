@@ -1,0 +1,115 @@
+@baseUrl = http://localhost:3000/api/orders
+@contentType = application/json
+@customerToken = REPLACE_WITH_CUSTOMER_TOKEN
+@vendorToken = REPLACE_WITH_VENDOR_TOKEN
+@adminToken = REPLACE_WITH_ADMIN_TOKEN
+
+### ---------- CUSTOMER ENDPOINTS ---------- ###
+
+### Create a new order (Customer)
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "customerId": "customer-id-123",
+  "vendorId": "vendor-id-456",
+  "items": [
+    {
+      "partId": "part-id-789",
+      "quantity": 2,
+      "notes": "Please deliver between 2-4 PM."
+    }
+  ],
+  "addressId": "address-id-111",
+  "orderType": "DELIVERY",
+  "paymentMethod": "CASH_ON_DELIVERY",
+  "notes": "Leave at front door",
+  "promoCode": "DISCOUNT10"
+}
+
+### Get my orders (Customer)
+GET {{baseUrl}}/my-orders
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+### Get order tracking information (Customer)
+GET {{baseUrl}}/ORDER_ID/tracking
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+### Cancel order (Customer)
+POST {{baseUrl}}/ORDER_ID/cancel
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "reason": "Changed my mind"
+}
+
+### ---------- VENDOR/ADMIN ENDPOINTS ---------- ###
+
+### Get my vendor orders (Vendor)
+GET {{baseUrl}}/my-vendor-orders
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### Get vendor orders (Admin or Vendor)
+GET {{baseUrl}}/vendor/vendor-id-456
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+### Generate order report for vendor (Vendor/Admin)
+GET {{baseUrl}}/reports/vendor-id-456?period=monthly
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### Update order status (Vendor/Admin)
+PATCH {{baseUrl}}/ORDER_ID/status
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "status": "IN_TRANSIT",
+  "notes": "Order is now in transit."
+}
+
+### ---------- GENERAL ENDPOINTS ---------- ###
+
+### Get customer orders by customerId (Admin or allowed user)
+GET {{baseUrl}}/customer/customer-id-123?limit=5&offset=0
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+### Get order by ID (Any authorized user)
+GET {{baseUrl}}/ORDER_ID
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+### ---------- ERROR CASES ---------- ###
+
+### Create order with missing required fields
+POST {{baseUrl}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}
+
+{
+  "customerId": "",
+  "vendorId": "",
+  "items": []
+}
+
+### Update order status with invalid status value
+PATCH {{baseUrl}}/ORDER_ID/status
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "status": "INVALID_STATUS",
+  "notes": "Attempt update with bad status"
+}
+
+### Access vendor endpoint using customer token
+GET {{baseUrl}}/my-vendor-orders
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}

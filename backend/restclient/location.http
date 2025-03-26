@@ -1,0 +1,149 @@
+@baseUrl = http://localhost:3000/api/locations
+@contentType = application/json
+@vendorToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiODUwMC0yNTMwLTQ1YzgtYmUzNC0yMzliZTM4OTM5NjUiLCJyb2xlIjoiVkVORE9SIiwic2Vzc2lvbklkIjoiY2Y4ZGU0Y2ItYjBjZi00ZTEzLWExYmUtODliZTllNTZlODE2IiwiaWF0IjoxNzQyODUxMTMzLCJleHAiOjE3NDI4NTQ3MzN9.e_USZ1LIxkM7TVKVQfpn8LVZyNoc2uJNwlXxeInCKWs
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiIwN2RhYWZjZS0xYTU4LTQ2YzctOTliMy0xZGUwYmQ4OWJhY2IiLCJpYXQiOjE3NDI4NTAwMjAsImV4cCI6MTc0Mjg1MzYyMH0.qR0-PMhZ1uovlWN8U5FqoKpTqbefh2O-zw9p5UtQzUY
+@driverToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3ZDhhYjVlMS1lMjVkLTRhYzQtYmQzNS0wMTY0MzE2YmVkMjAiLCJyb2xlIjoiRFJJVkVSIiwic2Vzc2lvbklkIjoiMDdkYWFmY2UtMWE1OC00NmM3LTk5YjMtMWRlMGJkODliYWNiIiwiaWF0IjoxNzQyODUwMDIwLCJleHAiOjE3NDI4NTM2MjB9.VxvpdBGj0nXMBhNIYefJmBzYLbN2jUhUL7fiJ-5lEE0
+
+### ---------- PUBLIC ENDPOINTS ---------- ###
+
+### Calculate distance between two points
+POST {{baseUrl}}/calculate-distance
+Content-Type: {{contentType}}
+
+{
+  "lat1": 6.5244,
+  "lon1": 3.3792,
+  "lat2": 6.4541,
+  "lon2": 3.4205
+}
+
+### Calculate delivery fee
+POST {{baseUrl}}/calculate-fee
+Content-Type: {{contentType}}
+
+{
+  "distance": 7.5,
+  "orderValue": 15000,
+  "isRush": false
+}
+
+### Calculate delivery fee (rush delivery)
+POST {{baseUrl}}/calculate-fee
+Content-Type: {{contentType}}
+
+{
+  "distance": 7.5,
+  "orderValue": 15000,
+  "isRush": true
+}
+
+### Calculate delivery fee (large order with discount)
+POST {{baseUrl}}/calculate-fee
+Content-Type: {{contentType}}
+
+{
+  "distance": 7.5,
+  "orderValue": 55000,
+  "isRush": false
+}
+
+### Estimate delivery time
+POST {{baseUrl}}/estimate-delivery-time
+Content-Type: {{contentType}}
+
+{
+  "distance": 7.5,
+  "trafficFactor": 1.0
+}
+
+### Estimate delivery time with traffic
+POST {{baseUrl}}/estimate-delivery-time
+Content-Type: {{contentType}}
+
+{
+  "distance": 7.5,
+  "trafficFactor": 1.5
+}
+
+### Check if location is within service area (Lagos Mainland)
+POST {{baseUrl}}/check-service-area
+Content-Type: {{contentType}}
+
+{
+  "lat": 6.5244, 
+  "lon": 3.3792
+}
+
+### Check if location is within service area (outside all service areas)
+POST {{baseUrl}}/check-service-area
+Content-Type: {{contentType}}
+
+{
+  "lat": 7.3986, 
+  "lon": 9.0765
+}
+
+### Get all service areas
+GET {{baseUrl}}/service-areas
+Content-Type: {{contentType}}
+
+### Get map rendering data
+POST {{baseUrl}}/map-data
+Content-Type: {{contentType}}
+
+{
+  "originLat": 6.5244,
+  "originLon": 3.3792,
+  "destLat": 6.4541,
+  "destLon": 3.4205
+}
+
+### ---------- AUTHENTICATED ENDPOINTS ---------- ###
+
+### Find nearest drivers (requires vendor/admin authentication)
+GET {{baseUrl}}/nearest-drivers?lat=6.5244&lon=3.3792&radius=10
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### Update driver location (requires driver authentication)
+PATCH {{baseUrl}}/driver-location
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "latitude": 6.5244,
+  "longitude": 3.3792
+}
+
+### ---------- ERROR CASES ---------- ###
+
+### Calculate distance with missing parameters
+POST {{baseUrl}}/calculate-distance
+Content-Type: {{contentType}}
+
+{
+  "lat1": 6.5244,
+  "lon1": 3.3792
+}
+
+### Calculate fee with missing parameters
+POST {{baseUrl}}/calculate-fee
+Content-Type: {{contentType}}
+
+{
+  "distance": 7.5
+}
+
+### Update driver location without authentication
+PATCH {{baseUrl}}/driver-location
+Content-Type: {{contentType}}
+
+{
+  "latitude": 6.5244,
+  "longitude": 3.3792
+}
+
+### Find nearest drivers without required role
+GET {{baseUrl}}/nearest-drivers?lat=6.5244&lon=3.3792&radius=10
+Content-Type: {{contentType}}
+Authorization: Bearer {{customerToken}}

@@ -1,0 +1,202 @@
+# @baseUrl = http://localhost:3000/api
+# @contentType = application/json
+# @customerToken = {{login.response.body.data.token}}
+# @vendorToken = {{vendorLogin.response.body.data.token}}
+# @adminToken = {{adminLogin.response.body.data.token}}
+
+# ### Environment setup - Login as customer for token
+# # @name login
+# POST {{baseUrl}}/auth/login
+# Content-Type: {{contentType}}
+
+# {
+#   "email": "customer@example.com",
+#   "password": "password123"
+# }
+
+# ### Login as vendor for token
+# # @name vendorLogin
+# POST {{baseUrl}}/auth/login
+# Content-Type: {{contentType}}
+
+# {
+#   "email": "vendor@example.com",
+#   "password": "password123"
+# }
+
+# ### Login as admin for token
+# # @name adminLogin
+# POST {{baseUrl}}/auth/login
+# Content-Type: {{contentType}}
+
+# {
+#   "email": "admin@example.com",
+#   "password": "admin123"
+# }
+
+# ### ---------- PAYMENT METHODS ---------- ###
+
+# ### Get customer payment methods
+# GET {{baseUrl}}/payments/methods/{{customerId}}
+# Authorization: Bearer {{customerToken}}
+
+# ### Add a new payment method - Card
+# POST {{baseUrl}}/payments/methods
+# Authorization: Bearer {{customerToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "customerId": "{{customerId}}",
+#   "type": "CARD",
+#   "provider": "Visa",
+#   "lastFourDigits": "4242",
+#   "expiryDate": "12/24",
+#   "isDefault": true,
+#   "tokenizedDetails": "tok_visa_4242"
+# }
+
+# ### Add a new payment method - Bank account
+# POST {{baseUrl}}/payments/methods
+# Authorization: Bearer {{customerToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "customerId": "{{customerId}}",
+#   "type": "BANK_ACCOUNT",
+#   "provider": "GTBank",
+#   "accountName": "John Customer",
+#   "lastFourDigits": "1234",
+#   "isDefault": false
+# }
+
+# ### Set default payment method
+# PUT {{baseUrl}}/payments/methods/default
+# Authorization: Bearer {{customerToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "customerId": "{{customerId}}",
+#   "paymentMethodId": "{{paymentMethodId}}"
+# }
+
+# ### Delete a payment method
+# DELETE {{baseUrl}}/payments/methods/{{customerId}}/{{paymentMethodId}}
+# Authorization: Bearer {{customerToken}}
+
+# ### ---------- PAYMENT PROCESSING ---------- ###
+
+# ### Initialize payment for an order
+# POST {{baseUrl}}/payments/initialize
+# Authorization: Bearer {{customerToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "orderId": "{{orderId}}",
+#   "customerId": "{{customerId}}",
+#   "vendorId": "{{vendorId}}",
+#   "amount": 25000,
+#   "paymentMethod": "CARD",
+#   "redirectUrl": "http://localhost:3000/payment/callback",
+#   "currency": "NGN"
+# }
+
+# ### Verify payment by transaction ID
+# POST {{baseUrl}}/payments/verify
+# Authorization: Bearer {{customerToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "transactionId": "{{transactionId}}"
+# }
+
+# ### Verify payment by reference
+# POST {{baseUrl}}/payments/verify
+# Authorization: Bearer {{customerToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "reference": "{{paymentReference}}"
+# }
+
+# ### ---------- TRANSACTION HISTORY ---------- ###
+
+# ### Get customer transaction history
+# GET {{baseUrl}}/payments/transactions?customerId={{customerId}}&limit=10&page=1
+# Authorization: Bearer {{customerToken}}
+
+# ### Get vendor transaction history
+# GET {{baseUrl}}/payments/transactions?vendorId={{vendorId}}&type=PAYMENT&status=SUCCESSFUL
+# Authorization: Bearer {{vendorToken}}
+
+# ### Admin - Get all transactions
+# GET {{baseUrl}}/payments/transactions?startDate=2023-01-01&endDate=2023-12-31&sortBy=createdAt&sortOrder=desc
+# Authorization: Bearer {{adminToken}}
+
+# ### ---------- REFUNDS ---------- ###
+
+# ### Request a refund
+# POST {{baseUrl}}/payments/refund/request
+# Authorization: Bearer {{customerToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "orderId": "{{orderId}}",
+#   "transactionId": "{{transactionId}}",
+#   "amount": 5000,
+#   "reason": "Item received damaged"
+# }
+
+# ### Admin - Process a refund
+# POST {{baseUrl}}/payments/refund/process/{{refundId}}
+# Authorization: Bearer {{adminToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "notes": "Refund approved after verification"
+# }
+
+# ### ---------- WEBHOOKS ---------- ###
+
+# ### Simulate payment webhook from Flutterwave
+# POST {{baseUrl}}/payments/webhook
+# Content-Type: {{contentType}}
+# verif-hash: {{flutterwaveWebhookHash}}
+
+# {
+#   "event": "charge.completed",
+#   "data": {
+#     "id": 285959875,
+#     "tx_ref": "{{paymentReference}}",
+#     "flw_ref": "FLW-MOCK-WEBHOOK",
+#     "device_fingerprint": "N/A",
+#     "amount": 25000,
+#     "currency": "NGN",
+#     "charged_amount": 25000,
+#     "app_fee": 250,
+#     "merchant_fee": 0,
+#     "processor_response": "Approved",
+#     "auth_model": "PIN",
+#     "ip": "123.456.78.9",
+#     "narration": "CARD Transaction",
+#     "status": "successful",
+#     "payment_type": "card",
+#     "created_at": "2023-03-15T15:31:41.000Z",
+#     "account_id": 17600,
+#     "customer": {
+#       "id": 1234567,
+#       "name": "John Customer",
+#       "phone_number": "08012345678",
+#       "email": "customer@example.com",
+#       "created_at": "2023-03-15T15:31:41.000Z"
+#     },
+#     "card": {
+#       "first_6digits": "123456",
+#       "last_4digits": "4242",
+#       "issuer": "VISA",
+#       "country": "NG",
+#       "type": "VISA",
+#       "token": "flw-t1nf-cac19ce7093717jdfs8d723d4e7-m03k",
+#       "expiry": "09/24"
+#     }
+#   }
+# }

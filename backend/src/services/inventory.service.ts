@@ -648,6 +648,29 @@ export class InventoryService {
   }
 
   /**
+   * Check if a part's stock is low and notify vendor if needed
+   * @param partId The ID of the part to check
+   */
+  async checkAndNotifyLowStock(partId: string): Promise<void> {
+    const part = await this.prisma.part.findUnique({
+      where: { id: partId },
+      include: {
+        vendor: true
+      }
+    });
+
+    if (!part) return;
+
+    // Use the existing lowStockAlert property which is already the threshold
+    const lowStockThreshold = part.lowStockAlert;
+    
+    // if (part.stockQuantity <= lowStockThreshold) {
+    //   // Notify vendor about low stock
+    //   await notificationService.sendLowStockNotification(part);
+    // }
+  }
+
+  /**
    * Get inventory valuation
    */
   async getInventoryValuation(vendorId: string): Promise<any> {

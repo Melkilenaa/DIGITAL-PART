@@ -1,0 +1,148 @@
+# @baseUrl = http://localhost:3003/api
+# @contentType = application/json
+# @vendorToken = {{vendorLogin.response.body.data.token}}
+# @driverToken = {{driverLogin.response.body.data.token}}
+# @adminToken = {{adminLogin.response.body.data.token}}
+
+# ### Environment setup - Login as vendor for token
+# # @name vendorLogin
+# POST {{baseUrl}}/auth/login
+# Content-Type: {{contentType}}
+
+# {
+#   "email": "vendor@example.com",
+#   "password": "password123"
+# }
+
+# ### Login as driver for token
+# # @name driverLogin
+# POST {{baseUrl}}/auth/login
+# Content-Type: {{contentType}}
+
+# {
+#   "email": "driver@example.com",
+#   "password": "password123"
+# }
+
+# ### Login as admin for token
+# # @name adminLogin
+# POST {{baseUrl}}/auth/login
+# Content-Type: {{contentType}}
+
+# {
+#   "email": "admin@example.com",
+#   "password": "admin123"
+# }
+
+# ### ---------- VENDOR PAYOUTS ---------- ###
+
+# ### Check vendor payout eligibility
+# GET {{baseUrl}}/payouts/eligibility
+# Authorization: Bearer {{vendorToken}}
+
+# ### Get vendor available balance
+# GET {{baseUrl}}/payouts/balance
+# Authorization: Bearer {{vendorToken}}
+
+# ### Request vendor payout
+# POST {{baseUrl}}/payouts/request
+# Authorization: Bearer {{vendorToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "amount": 5000
+# }
+
+# ### Get vendor payout requests
+# GET {{baseUrl}}/payouts/requests
+# Authorization: Bearer {{vendorToken}}
+
+# ### Get specific payout request details
+# GET {{baseUrl}}/payouts/requests/{{payoutRequestId}}
+# Authorization: Bearer {{vendorToken}}
+
+# ### ---------- DRIVER PAYOUTS ---------- ###
+
+# ### Check driver payout eligibility
+# GET {{baseUrl}}/payouts/eligibility
+# Authorization: Bearer {{driverToken}}
+
+# ### Get driver available balance
+# GET {{baseUrl}}/payouts/balance
+# Authorization: Bearer {{driverToken}}
+
+# ### Request driver payout
+# POST {{baseUrl}}/payouts/request
+# Authorization: Bearer {{driverToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "amount": 3000
+# }
+
+# ### Get driver payout requests
+# GET {{baseUrl}}/payouts/requests
+# Authorization: Bearer {{driverToken}}
+
+# ### ---------- ADMIN PAYOUT MANAGEMENT ---------- ###
+
+# ### Admin - Get all payout requests
+# GET {{baseUrl}}/payouts/requests?status=PENDING&userType=VENDOR
+# Authorization: Bearer {{adminToken}}
+
+# ### Admin - Get all payout requests with filters
+# GET {{baseUrl}}/payouts/requests?startDate=2023-01-01&endDate=2023-12-31&sortBy=amount&sortOrder=desc
+# Authorization: Bearer {{adminToken}}
+
+# ### Admin - Approve payout request
+# PUT {{baseUrl}}/payouts/requests/{{payoutRequestId}}/process
+# Authorization: Bearer {{adminToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "action": "APPROVE",
+#   "notes": "Payout approved after verification"
+# }
+
+# ### Admin - Reject payout request
+# PUT {{baseUrl}}/payouts/requests/{{payoutRequestId}}/process
+# Authorization: Bearer {{adminToken}}
+# Content-Type: {{contentType}}
+
+# {
+#   "action": "REJECT",
+#   "notes": "Insufficient verification - please update your profile"
+# }
+
+# ### ---------- WEBHOOKS ---------- ###
+
+# ### Simulate transfer webhook from Flutterwave
+# POST {{baseUrl}}/payouts/webhook
+# Content-Type: {{contentType}}
+# verif-hash: {{flutterwaveWebhookHash}}
+
+# {
+#   "event": "transfer.completed",
+#   "data": {
+#     "id": 12345,
+#     "account_number": "0123456789",
+#     "bank_name": "GTB",
+#     "bank_code": "058",
+#     "fullname": "Auto Parts Vendor Ltd",
+#     "currency": "NGN",
+#     "debit_currency": "NGN",
+#     "amount": 5000,
+#     "fee": 50,
+#     "status": "SUCCESSFUL",
+#     "reference": "DAMPS-POUT-12345",
+#     "meta": {
+#       "sender": "DAMPS Auto Parts",
+#       "source": "balance"
+#     },
+#     "narration": "Payout from DAMPS - Ref: DAMPS-POUT-12345",
+#     "complete_message": "Transfer completed successfully",
+#     "requires_approval": 0,
+#     "is_approved": 1,
+#     "created_at": "2023-03-15T15:31:41.000Z"
+#   }
+# }
