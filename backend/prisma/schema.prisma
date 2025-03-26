@@ -421,6 +421,7 @@ model Order {
   @@index([orderStatus])
   @@index([paymentStatus])
   @@index([createdAt])
+  Transaction Transaction[]
 }
 
 model OrderItem {
@@ -592,6 +593,7 @@ model Transaction {
   updatedAt         DateTime          @updatedAt
   refunds           Refund[]
   payoutRequest     PayoutRequest?
+  order            Order?            @relation(fields: [orderId], references: [id])
 
   
   @@index([reference])

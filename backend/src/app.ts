@@ -10,6 +10,8 @@ import partRoutes from './routes/part.routes';
 import vendorRoutes from './routes/vendor.routes';
 import promotionRoutes from './routes/promotion.routes';
 import inventoryRoutes from './routes/inventory.routes';
+import payoutRoutes from './routes/payout.routes';
+import paymentRoutes from './routes/payment.routes';
 
 const cors = require('cors');
 const app = express();
@@ -28,5 +30,7 @@ app.use('/api/parts', partRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/promotions', promotionRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/payouts', payoutRoutes);
 
 export default app;
