@@ -1,0 +1,186 @@
+@baseUrl = http://localhost:3000/api/drivers
+@contentType = application/json
+@driverToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3ZDhhYjVlMS1lMjVkLTRhYzQtYmQzNS0wMTY0MzE2YmVkMjAiLCJyb2xlIjoiRFJJVkVSIiwic2Vzc2lvbklkIjoiMDdkYWFmY2UtMWE1OC00NmM3LTk5YjMtMWRlMGJkODliYWNiIiwiaWF0IjoxNzQyODUwMDIwLCJleHAiOjE3NDI4NTM2MjB9.VxvpdBGj0nXMBhNIYefJmBzYLbN2jUhUL7fiJ-5lEE0
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YTJhYTg5Ny1iZDQ1LTRkMDktOGU1Ny1hNWMwYzBkYzRhZTQiLCJyb2xlIjoiQURNSU4iLCJzZXNzaW9uSWQiOiIwN2RhYWZjZS0xYTU4LTQ2YzctOTliMy0xZGUwYmQ4OWJhY2IiLCJpYXQiOjE3NDI4NTAwMjAsImV4cCI6MTc0Mjg1MzYyMH0.BzYlGgUMkKCf2vMz0YqqaTdgiYPG9SUTwvDVxuKYCps
+@vendorToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiODUwMC0yNTMwLTQ1YzgtYmUzNC0yMzliZTM4OTM5NjUiLCJyb2xlIjoiVkVORE9SIiwic2Vzc2lvbklkIjoiY2Y4ZGU0Y2ItYjBjZi00ZTEzLWExYmUtODliZTllNTZlODE2IiwiaWF0IjoxNzQyODUxMTMzLCJleHAiOjE3NDI4NTQ3MzN9.e_USZ1LIxkM7TVKVQfpn8LVZyNoc2uJNwlXxeInCKWs
+@customerToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiIwN2RhYWZjZS0xYTU4LTQ2YzctOTliMy0xZGUwYmQ4OWJhY2IiLCJpYXQiOjE3NDI4NTAwMjAsImV4cCI6MTc0Mjg1MzYyMH0.qR0-PMhZ1uovlWN8U5FqoKpTqbefh2O-zw9p5UtQzUY
+
+### ---------- DRIVER PROFILE ENDPOINTS ---------- ###
+
+### Get driver profile (for authenticated driver)
+GET {{baseUrl}}/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### Update driver profile
+PATCH {{baseUrl}}/profile
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "phoneNumber": "+2347012345678"
+}
+
+### ---------- DRIVER VEHICLE INFORMATION ---------- ###
+
+### Update vehicle information
+PATCH {{baseUrl}}/vehicle
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "vehicleType": "Motorcycle",
+  "vehicleColor": "Red",
+  "licensePlate": "ABC-123XY",
+  "maxPackageSize": "Medium",
+  "maxPackageWeight": 10.5
+}
+
+### ---------- DRIVER DOCUMENTS ---------- ###
+
+### Update driver documents with file uploads
+PATCH {{baseUrl}}/documents
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{driverToken}}
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="docTypes"
+
+{"drivingLicense":"DRIVER_LICENSE","insuranceDocument":"VEHICLE_INSURANCE","identificationDoc":"GOVERNMENT_ID"}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="docDescriptions"
+
+{"drivingLicense":"Driver's license document","insuranceDocument":"Vehicle insurance policy","identificationDoc":"Government-issued ID card"}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="drivingLicense"; filename="license.jpg"
+Content-Type: image/jpeg
+
+< /path/to/your/license.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="insuranceDocument"; filename="insurance.pdf"
+Content-Type: application/pdf
+
+< /path/to/your/insurance.pdf
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="identificationDoc"; filename="id-card.jpg"
+Content-Type: image/jpeg
+
+< /path/to/your/id-card.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### ---------- DRIVER AVAILABILITY ---------- ###
+
+### Set driver as available
+PATCH {{baseUrl}}/availability
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "isAvailable": true
+}
+
+### Set driver as unavailable
+PATCH {{baseUrl}}/availability
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "isAvailable": false
+}
+
+### ---------- DRIVER LOCATION ---------- ###
+
+### Update driver's current location
+PATCH {{baseUrl}}/location
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "latitude": 6.5244,
+  "longitude": 3.3792
+}
+
+### ---------- DRIVER SERVICE AREAS ---------- ###
+
+### Update driver's service areas
+PATCH {{baseUrl}}/service-areas
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "serviceAreas": [
+    {
+      "name": "Lagos Mainland",
+      "boundaryCoordinates": [
+        { "lat": 6.5200, "lng": 3.3700 },
+        { "lat": 6.5300, "lng": 3.3900 },
+        { "lat": 6.5100, "lng": 3.4000 },
+        { "lat": 6.5000, "lng": 3.3800 }
+      ]
+    },
+    {
+      "name": "Lagos Island",
+      "boundaryCoordinates": [
+        { "lat": 6.4500, "lng": 3.4000 },
+        { "lat": 6.4600, "lng": 3.4200 },
+        { "lat": 6.4400, "lng": 3.4300 },
+        { "lat": 6.4300, "lng": 3.4100 }
+      ]
+    }
+  ]
+}
+
+### ---------- DRIVER WORKING HOURS ---------- ###
+
+### Update driver's working hours
+PATCH {{baseUrl}}/working-hours
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "workingHours": {
+    "monday": { "start": "08:00", "end": "18:00" },
+    "tuesday": { "start": "08:00", "end": "18:00" },
+    "wednesday": { "start": "08:00", "end": "18:00" },
+    "thursday": { "start": "08:00", "end": "18:00" },
+    "friday": { "start": "08:00", "end": "18:00" },
+    "saturday": { "start": "10:00", "end": "16:00" },
+    "sunday": { "start": "closed", "end": "closed" }
+  }
+}
+
+### ---------- DRIVER HISTORY AND METRICS ---------- ###
+
+### Get driver's delivery history
+GET {{baseUrl}}/delivery-history
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### Get driver's delivery history with filters
+GET {{baseUrl}}/delivery-history?status=DELIVERED&startDate=2025-01-01&endDate=2025-04-01&limit=10&offset=0
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### Get driver's performance metrics
+GET {{baseUrl}}/performance-metrics
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### Get driver's performance metrics for specific period
+GET {{baseUrl}}/performance-metrics?period=weekly
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### ---------- ADMIN/VENDOR ENDPOINTS ---------- ###
+
+### Get driver by ID (admin/vendor access)
+GET {{baseUrl}}/7d8ab5e1-e25d-4ac4-bd35-0164316bed20
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+### Get driver by ID (vendor access)
+GET {{baseUrl}}/7d8ab5e1-e25d-4ac4-bd35-0164316bed20
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}

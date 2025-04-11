@@ -1,0 +1,115 @@
+@baseUrl = http://localhost:3000/api/earnings
+@contentType = application/json
+@driverToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3ZDhhYjVlMS1lMjVkLTRhYzQtYmQzNS0wMTY0MzE2YmVkMjAiLCJyb2xlIjoiRFJJVkVSIiwic2Vzc2lvbklkIjoiMDdkYWFmY2UtMWE1OC00NmM3LTk5YjMtMWRlMGJkODliYWNiIiwiaWF0IjoxNzQyODUwMDIwLCJleHAiOjE3NDI4NTM2MjB9.VxvpdBGj0nXMBhNIYefJmBzYLbN2jUhUL7fiJ-5lEE0
+@vendorToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0N2RiODUwMC0yNTMwLTQ1YzgtYmUzNC0yMzliZTM4OTM5NjUiLCJyb2xlIjoiVkVORE9SIiwic2Vzc2lvbklkIjoiY2Y4ZGU0Y2ItYjBjZi00ZTEzLWExYmUtODliZTllNTZlODE2IiwiaWF0IjoxNzQyODUxMTMzLCJleHAiOjE3NDI4NTQ3MzN9.e_USZ1LIxkM7TVKVQfpn8LVZyNoc2uJNwlXxeInCKWs
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5YTJhYTg5Ny1iZDQ1LTRkMDktOGU1Ny1hNWMwYzBkYzRhZTQiLCJyb2xlIjoiQURNSU4iLCJzZXNzaW9uSWQiOiIwN2RhYWZjZS0xYTU4LTQ2YzctOTliMy0xZGUwYmQ4OWJhY2IiLCJpYXQiOjE3NDI4NTAwMjAsImV4cCI6MTc0Mjg1MzYyMH0.BzYlGgUMkKCf2vMz0YqqaTdgiYPG9SUTwvDVxuKYCps
+
+### ---------- DRIVER EARNINGS ENDPOINTS ---------- ###
+
+### Get earnings for the logged-in driver
+GET {{baseUrl}}/driver
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### Get earnings with filters (paid/unpaid, date range, pagination)
+GET {{baseUrl}}/driver?isPaid=false&startDate=2025-01-01&endDate=2025-04-01&limit=10&offset=0
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### Request a payout as driver
+POST {{baseUrl}}/driver/payout
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+{
+  "amount": 250.00
+}
+
+### Get tax report for a driver (current year)
+GET {{baseUrl}}/driver/tax-report/2025
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### Get transaction history for a driver
+GET {{baseUrl}}/driver/transactions
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### Get filtered transaction history for a driver
+GET {{baseUrl}}/driver/transactions?type=PAYMENT&status=SUCCESSFUL&startDate=2025-01-01&endDate=2025-04-01&limit=10&offset=0
+Content-Type: {{contentType}}
+Authorization: Bearer {{driverToken}}
+
+### ---------- VENDOR EARNINGS ENDPOINTS ---------- ###
+
+### Get earnings for the logged-in vendor
+GET {{baseUrl}}/vendor
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### Get earnings with filters (date range, pagination)
+GET {{baseUrl}}/vendor?startDate=2025-01-01&endDate=2025-04-01&limit=10&offset=0
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### Request a payout as vendor
+POST {{baseUrl}}/vendor/payout
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+{
+  "amount": 500.00
+}
+
+### Get tax report for a vendor (current year)
+GET {{baseUrl}}/vendor/tax-report/2025
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### Get transaction history for a vendor
+GET {{baseUrl}}/vendor/transactions
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### Get filtered transaction history for a vendor
+GET {{baseUrl}}/vendor/transactions?type=PAYMENT&status=SUCCESSFUL&startDate=2025-01-01&endDate=2025-04-01&limit=10&offset=0
+Content-Type: {{contentType}}
+Authorization: Bearer {{vendorToken}}
+
+### ---------- ADMIN-ONLY ENDPOINTS ---------- ###
+
+### Calculate earnings for a completed delivery (admin only)
+POST {{baseUrl}}/calculate/a1b2c3d4-e5f6-7890-1234-567890abcdef
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+### Get all payout requests (admin only)
+GET {{baseUrl}}/payout-requests
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+### Get filtered payout requests (admin only)
+GET {{baseUrl}}/payout-requests?status=PENDING&userType=DRIVER&startDate=2025-01-01&endDate=2025-04-01&limit=10&offset=0
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+### Process a payout request - approve (admin only)
+PATCH {{baseUrl}}/payout-requests/a1b2c3d4-e5f6-7890-1234-567890abcdef
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "approved": true,
+  "notes": "Payout approved and processed"
+}
+
+### Process a payout request - reject (admin only)
+PATCH {{baseUrl}}/payout-requests/a1b2c3d4-e5f6-7890-1234-567890abcdef
+Content-Type: {{contentType}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "approved": false,
+  "notes": "Payout rejected due to insufficient documentation"
+}
+
