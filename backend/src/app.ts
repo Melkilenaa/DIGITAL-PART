@@ -17,6 +17,7 @@ import orderItemRoutes from './routes/orderitem.routes';
 import locationRoutes from './routes/location.routes';
 import deliveryRoutes from './routes/delivery.routes';
 import driverRoutes from './routes/driver.routes';
+import notificationRoutes from './routes/notification.routes';
 
 const cors = require('cors');
 const app = express();
@@ -42,5 +43,6 @@ app.use('/api/order-items', orderItemRoutes);
 app.use('/api/deliveries', deliveryRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/drivers', driverRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 export default app;
