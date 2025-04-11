@@ -1,0 +1,102 @@
+@baseUrl = http://localhost:3000/api
+@authToken = YOUR_JWT_TOKEN_HERE
+
+### Send a new message
+POST {{baseUrl}}/messages
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "receiverId": "recipient-user-id",
+  "content": "Hello! This is a test message.",
+  "attachments": [
+    "/uploads/messages/attachment1.jpg"
+  ]
+}
+
+### Get all conversations for current user
+GET {{baseUrl}}/messages/conversations
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get messages between current user and another user
+GET {{baseUrl}}/messages/user-id-here
+?page=1
+&limit=20
+&startDate=2025-01-01T00:00:00Z
+&endDate=2025-04-30T23:59:59Z
+&unreadOnly=false
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get only unread messages from a specific user
+GET {{baseUrl}}/messages/user-id-here?unreadOnly=true
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Mark a specific message as read
+PUT {{baseUrl}}/messages/message-id-here/read
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Mark all messages from a user as read
+PUT {{baseUrl}}/messages/user-id-here/read-all
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Get unread message count
+GET {{baseUrl}}/messages/unread/count
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Search messages by content
+GET {{baseUrl}}/messages/search
+?q=search-term-here
+&page=1
+&limit=20
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Upload file attachment
+POST {{baseUrl}}/messages/attachments
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer {{authToken}}
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="test-attachment.jpg"
+Content-Type: image/jpeg
+
+< ./test-attachment.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Delete a message
+DELETE {{baseUrl}}/messages/message-id-here
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+### Example: Send a message with a link
+POST {{baseUrl}}/messages
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "receiverId": "recipient-user-id",
+  "content": "Check out this link: https://example.com"
+}
+
+### Example: Send a message with formatted text
+POST {{baseUrl}}/messages
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "receiverId": "recipient-user-id",
+  "content": "This message contains *bold* and _italic_ formatting."
+}
+
+### Example: Get messages in date range
+GET {{baseUrl}}/messages/user-id-here
+?startDate=2025-04-01T00:00:00Z
+&endDate=2025-04-11T23:59:59Z
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
