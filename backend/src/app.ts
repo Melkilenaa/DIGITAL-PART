@@ -18,6 +18,7 @@ import locationRoutes from './routes/location.routes';
 import deliveryRoutes from './routes/delivery.routes';
 import driverRoutes from './routes/driver.routes';
 import notificationRoutes from './routes/notification.routes';
+import messageRoutes from './routes/message.routes';
 
 const cors = require('cors');
 const app = express();
@@ -44,5 +45,6 @@ app.use('/api/deliveries', deliveryRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/drivers', driverRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/messages', messageRoutes);
 
 export default app;

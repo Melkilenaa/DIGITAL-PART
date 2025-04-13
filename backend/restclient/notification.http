@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:3003/api
+@baseUrl = http://localhost:3000/api
 @authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiI0YzlhMDBlMC1lNmUzLTQzZGUtOGI0ZS03NGI4ZTg2NDljYTgiLCJpYXQiOjE3NDQzNzgzNTIsImV4cCI6MTc0NDM4MTk1Mn0.LgdVYHCXAF7ULDBymfhM8FRoTuwuBnqHAldJwzrAPWM
 
 ### Get all notifications with pagination and filtering

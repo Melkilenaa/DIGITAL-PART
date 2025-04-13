@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:3003/api/promotions
+@baseUrl = http://localhost:3000/api/promotions
 @contentType = application/json
 
 ### Variables for tokens from auth.http

@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:3003/api/inventory
+@baseUrl = http://localhost:3000/api/inventory
 @contentType = application/json
 
 ### Variables for tokens from auth.http

@@ -1,4 +1,4 @@
-@baseUrl = http://localhost:3003/api/auth
+@baseUrl = http://localhost:3000/api/auth
 @contentType = application/json
 @adminAccessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwZDYwY2Q5MC0yZjM1LTRjNTctODFmMy05NWM1MDM2YWFiNDciLCJyb2xlIjoiQURNSU4iLCJzZXNzaW9uSWQiOiJkNjE4MDdlMi01Mzc5LTRiZDQtODQxNi1lNGQ5MTRmMjRjZGMiLCJpYXQiOjE3NDI4MTU5ODYsImV4cCI6MTc0MjgxOTU4Nn0.hN8sJfnx6Gk8czSi9q_fKG63q6JxOuaPYeRX3wmgmzY
 @customerAccessToken = 

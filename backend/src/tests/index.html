@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAMPS Messaging Tester</title>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <style>
+        :root {
+            --primary: #006AFF;
+            --secondary: #FF8A00;
+            --background: #FFFFFF;
+            --surface: #F5F7FA;
+            --text-primary: #1C2024;
+            --text-secondary: #6B7280;
+            --error: #E53935;
+            --success: #34C759;
+            --warning: #FFB700;
+            --divider: #E2E8F0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            display: grid;
+            grid-template-rows: auto 1fr;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            background-color: var(--error);
+        }
+
+        .status-indicator.online {
+            background-color: var(--success);
+        }
+
+        main {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: calc(100vh - 64px);
+        }
+
+        .auth-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .auth-form {
+            background-color: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 400px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-form h2 {
+            margin-bottom: 16px;
+        }
+
+        .sidebar {
+            background-color: var(--surface);
+            border-right: 1px solid var(--divider);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-bar {
+            padding: 16px;
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--divider);
+            font-size: 14px;
+        }
+
+        .conversations {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .conversation {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--divider);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .conversation:hover, .conversation.active {
+            background-color: rgba(0, 106, 255, 0.1);
+        }
+
+        .conversation-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .conversation-details {
+            flex: 1;
+        }
+
+        .conversation-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+        }
+
+        .conversation-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .conversation-preview {
+            font-size: 14px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .conversation-unread {
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            background-color: var(--primary);
+            color: white;
+            font-size: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 8px;
+            padding: 0 6px;
+        }
+
+        .message-thread {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .thread-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--divider);
+            display: flex;
+            align-items: center;
+        }
+
+        .thread-header h2 {
+            margin-left: 12px;
+            font-size: 18px;
+        }
+
+        .messages {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            max-width: 70%;
+        }
+
+        .message.sent {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--secondary);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin: 0 8px;
+        }
+
+        .message.sent .message-avatar {
+            background-color: var(--primary);
+        }
+
+        .message-bubble {
+            background-color: var(--surface);
+            border-radius: 12px;
+            padding: 12px;
+            position: relative;
+        }
+
+        .message.sent .message-bubble {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .message-content {
+            margin-bottom: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+
+        .message.sent .message-time {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .message-actions {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .message:hover .message-actions {
+            opacity: 1;
+        }
+
+        .message-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .message.sent .message-action-btn {
+            color: white;
+        }
+
+        .message-file {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .message-file-icon {
+            margin-right: 8px;
+        }
+
+        .message-form {
+            padding: 16px;
+            border-top: 1px solid var(--divider);
+            display: flex;
+            align-items: center;
+        }
+
+        .attachment-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-secondary);
+            padding: 8px;
+            margin-right: 8px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 24px;
+            border: 1px solid var(--divider);
+            font-size: 14px;
+            resize: none;
+            max-height: 120px;
+            min-height: 24px;
+        }
+
+        .send-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        .attachment-preview {
+            display: flex;
+            padding: 8px;
+            background-color: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .attachment-preview img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+
+        .attachment-preview-name {
+            flex: 1;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .attachment-preview-remove {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--error);
+            margin-left: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--divider);
+            font-size: 14px;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-secondary);
+            text-align: center;
+            padding: 16px;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth overlay - shown until logged in -->
+    <div class="auth-wrapper" id="authWrapper">
+        <div class="auth-form">
+            <h2>Authentication</h2>
+            <div class="form-group">
+                <label for="userId">User ID</label>
+                <input type="text" id="userId" placeholder="Enter your user ID">
+            </div>
+            <div class="form-group">
+                <label for="jwtToken">JWT Token</label>
+                <input type="text" id="jwtToken" placeholder="Enter your JWT token">
+            </div>
+            <button class="auth-btn" id="loginBtn">Login</button>
+        </div>
+    </div>
+
+    <header>
+        <h1>DAMPS Messaging</h1>
+        <div class="connection-status">
+            <span class="status-indicator" id="statusIndicator"></span>
+            <span id="connectionStatus">Disconnected</span>
+        </div>
+    </header>
+
+    <main>
+        <aside class="sidebar">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search messages...">
+            </div>
+            <!-- New conversation section -->
+            <div class="new-conversation" style="padding: 16px; border-bottom: 1px solid var(--divider);">
+                <h3 style="margin-bottom: 8px; font-size: 14px;">Start New Conversation</h3>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="newRecipientId" placeholder="Enter recipient ID" style="flex: 1; padding: 8px; border-radius: 8px; border: 1px solid var(--divider);">
+                    <button id="startConversationBtn" style="background-color: var(--primary); color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer;">Start</button>
+                </div>
+            </div>
+            <div class="conversations" id="conversationsList">
+                <!-- Conversations will be populated here -->
+            </div>
+        </aside>
+
+        <section class="message-thread">
+            <div class="thread-header" id="threadHeader">
+                <div class="conversation-avatar">?</div>
+                <h2>Select a conversation</h2>
+                <div class="conversation-unread" id="threadUnreadCount" style="display: none;">0</div>
+            </div>
+            
+            <div class="messages" id="messagesList">
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <h3>Select a conversation to start messaging</h3>
+                </div>
+            </div>
+            
+            <form class="message-form" id="messageForm">
+                <div id="attachmentPreview" style="display: none;" class="attachment-preview">
+                    <!-- Attachment preview will be displayed here -->
+                </div>
+                <input type="file" id="fileInput" style="display: none;">
+                <button type="button" class="attachment-btn" id="attachmentBtn">📎</button>
+                <textarea class="message-input" id="messageInput" placeholder="Type a message..." rows="1"></textarea>
+                <button type="submit" class="send-btn">➤</button>
+            </form>
+        </section>
+    </main>
+
+    <script>
+        // Store auth info
+        let currentUserId = '';
+        let jwtToken = '';
+        let currentReceiverId = '';
+        let socket = null;
+        let selectedConversation = null;
+        let currentAttachment = null;
+        const baseUrl = 'http://localhost:3000/api';
+
+        // DOM elements
+        const authWrapper = document.getElementById('authWrapper');
+        const loginBtn = document.getElementById('loginBtn');
+        const userIdInput = document.getElementById('userId');
+        const jwtTokenInput = document.getElementById('jwtToken');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const conversationsList = document.getElementById('conversationsList');
+        const threadHeader = document.getElementById('threadHeader');
+        const threadUnreadCount = document.getElementById('threadUnreadCount');
+        const messagesList = document.getElementById('messagesList');
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        const searchInput = document.getElementById('searchInput');
+        const fileInput = document.getElementById('fileInput');
+        const attachmentBtn = document.getElementById('attachmentBtn');
+        const attachmentPreview = document.getElementById('attachmentPreview');
+
+        // ---------- Event Listeners ----------
+
+        // Login button click
+        loginBtn.addEventListener('click', async () => {
+            currentUserId = userIdInput.value.trim();
+            jwtToken = jwtTokenInput.value.trim();
+            
+            if (!currentUserId || !jwtToken) {
+                alert('Please enter both user ID and JWT token');
+                return;
+            }
+            
+            authWrapper.style.display = 'none';
+            
+            // Initialize the app
+            initializeApp();
+        });
+
+        // Search input
+        searchInput.addEventListener('input', debounce(async (e) => {
+            const searchTerm = e.target.value.trim();
+            if (searchTerm.length < 2) {
+                // If search is cleared, load conversations instead
+                if (searchTerm === '') {
+                    loadConversations();
+                }
+                return;
+            }
+            
+            searchMessages(searchTerm);
+        }, 500));
+
+        // Message form submit
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentReceiverId) {
+                alert('Please select a conversation first');
+                return;
+            }
+            
+            const content = messageInput.value.trim();
+            if (!content && !currentAttachment) {
+                return;
+            }
+            
+            try {
+                let attachmentPath = null;
+                
+                // Upload attachment first if exists
+                if (currentAttachment) {
+                    attachmentPath = await uploadAttachment(currentAttachment);
+                }
+                
+                // Send message
+                const message = {
+                    receiverId: currentReceiverId,
+                    content: content,
+                    attachments: attachmentPath ? [attachmentPath] : []
+                };
+                
+                // Try to send via socket first
+                if (socket && socket.connected) {
+                    socket.emit('send_message', {
+                        senderId: currentUserId,
+                        ...message
+                    }, (response) => {
+                        if (!response.success) {
+                            console.error('Socket message failed, falling back to API', response.error);
+                            sendMessageAPI(message);
+                        } else {
+                            // Add the message to the UI
+                            addMessageToUI(response.message, true);
+                            // Clear the input and attachment
+                            messageInput.value = '';
+                            clearAttachment();
+                        }
+                    });
+                } else {
+                    await sendMessageAPI(message);
+                    // Clear the input and attachment
+                    messageInput.value = '';
+                    clearAttachment();
+                }
+            } catch (error) {
+                console.error('Failed to send message:', error);
+                alert('Failed to send message');
+            }
+        });
+
+        // Attachment button click
+        attachmentBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            currentAttachment = file;
+            
+            // Show preview
+            attachmentPreview.innerHTML = `
+                <img src="${URL.createObjectURL(file)}" alt="Attachment">
+                <div class="attachment-preview-name">${file.name}</div>
+                <button type="button" class="attachment-preview-remove" id="removeAttachment">✕</button>
+            `;
+            attachmentPreview.style.display = 'flex';
+            
+            // Add remove button event
+            document.getElementById('removeAttachment').addEventListener('click', clearAttachment);
+        });
+
+        // Auto resize textarea
+        messageInput.addEventListener('input', () => {
+            messageInput.style.height = 'auto';
+            messageInput.style.height = (messageInput.scrollHeight) + 'px';
+        });
+
+        // Add event listener for start conversation button
+        document.getElementById('startConversationBtn').addEventListener('click', () => {
+            const recipientId = document.getElementById('newRecipientId').value.trim();
+            if (!recipientId) {
+                alert('Please enter a recipient ID');
+                return;
+            }
+            
+            // Set up the new conversation
+            currentReceiverId = recipientId;
+            selectedConversation = {
+                id: recipientId,
+                name: recipientId,
+                unreadCount: 0,
+                lastMessage: null
+            };
+            
+            // Update thread header
+            threadHeader.innerHTML = `
+                <div class="conversation-avatar">${getInitials(recipientId)}</div>
+                <h2>${recipientId}</h2>
+            `;
+            
+            // Clear messages and show empty state
+            messagesList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">💬</div>
+                    <h3>No messages yet</h3>
+                    <p>Start the conversation by sending a message.</p>
+                </div>
+            `;
+            
+            console.log('New conversation started with:', recipientId);
+        });
+
+        // ---------- API Functions ----------
+
+        // Initialize the application
+        async function initializeApp() {
+            try {
+                // Connect to Socket.IO
+                initializeSocketIO();
+                
+                // Load conversations
+                await loadConversations();
+                
+                // Load unread count
+                await loadUnreadCount();
+            } catch (error) {
+                console.error('Failed to initialize app:', error);
+                alert('Failed to initialize app');
+            }
+        }
+
+        // Initialize Socket.IO connection
+        function initializeSocketIO() {
+            // Connect to server
+            socket = io('http://localhost:3000', {
+                auth: { token: jwtToken }
+            });
+
+            console.log('Attempting to connect to Socket.IO server...');
+            
+            // Socket event handlers
+            socket.on('connect', () => {
+                statusIndicator.classList.add('online');
+                connectionStatus.textContent = 'Connected';
+                
+                // Register user with socket
+                socket.emit('register', currentUserId, (response) => {
+                    if (!response.success) {
+                        console.error('Failed to register with socket:', response.error);
+                    }
+                });
+            });
+            
+            socket.on('disconnect', () => {
+                statusIndicator.classList.remove('online');
+                connectionStatus.textContent = 'Disconnected';
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error('Socket connection error:', error);
+                statusIndicator.classList.remove('online');
+                connectionStatus.textContent = `Connection Error: ${error.message}`;
+            });
+
+            socket.on('error', (error) => {
+                console.error('Socket error:', error);
+                statusIndicator.classList.remove('online');
+                connectionStatus.textContent = `Error: ${error.message}`;
+            });
+            
+            socket.on('new_message', (message) => {
+                // If message is for current conversation, add it to UI
+                if (message.senderId === currentReceiverId) {
+                    addMessageToUI(message, false);
+                    // Mark as read
+                    markMessageAsRead(message.id);
+                }
+                
+                // Update conversations list
+                loadConversations();
+                // Update unread count
+                loadUnreadCount();
+            });
+            
+            socket.on('message_read', (data) => {
+                // Update message read status in UI
+                const messageEl = document.getElementById(`message-${data.messageId}`);
+                if (messageEl) {
+                    const statusEl = messageEl.querySelector('.message-status');
+                    if (statusEl) {
+                        statusEl.textContent = '✓✓';
+                        statusEl.style.color = 'var(--success)';
+                    }
+                }
+            });
+            
+            socket.on('message_deleted', (data) => {
+                // Remove message from UI
+                const messageEl = document.getElementById(`message-${data.messageId}`);
+                if (messageEl) {
+                    messageEl.remove();
+                }
+                
+                // Update conversations list
+                loadConversations();
+            });
+        }
+
+        // Load all conversations
+        async function loadConversations() {
+            try {
+                const response = await fetch(`${baseUrl}/messages/conversations`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load conversations');
+                }
+                
+                const conversations = await response.json();
+                renderConversations(conversations);
+                
+                return conversations;
+            } catch (error) {
+                console.error('Error loading conversations:', error);
+                return [];
+            }
+        }
+
+        // Load messages between current user and selected user
+        async function loadMessages(userId, options = {}) {
+            try {
+                let url = `${baseUrl}/messages/${userId}`;
+                
+                // Add query parameters if provided
+                const params = new URLSearchParams();
+                if (options.page) params.append('page', options.page);
+                if (options.limit) params.append('limit', options.limit);
+                if (options.startDate) params.append('startDate', options.startDate);
+                if (options.endDate) params.append('endDate', options.endDate);
+                if (options.unreadOnly) params.append('unreadOnly', options.unreadOnly);
+                
+                if (params.toString()) {
+                    url += `?${params.toString()}`;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load messages');
+                }
+                
+                const result = await response.json();
+                renderMessages(result.messages);
+                
+                // If there are unread messages, mark all as read
+                if (result.unreadCount > 0) {
+                    markAllAsRead(userId);
+                }
+                
+                return result;
+            } catch (error) {
+                console.error('Error loading messages:', error);
+                return { messages: [], total: 0, unreadCount: 0 };
+            }
+        }
+
+        // Send a message via REST API
+        async function sendMessageAPI(message) {
+            try {
+                const response = await fetch(`${baseUrl}/messages`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(message)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to send message');
+                }
+                
+                const sentMessage = await response.json();
+                addMessageToUI(sentMessage, true);
+                
+                // Update conversations list
+                loadConversations();
+                
+                return sentMessage;
+            } catch (error) {
+                console.error('Error sending message:', error);
+                throw error;
+            }
+        }
+
+        // Upload attachment
+        async function uploadAttachment(file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                const response = await fetch(`${baseUrl}/messages/attachments`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to upload attachment');
+                }
+                
+                const result = await response.json();
+                return result.filePath;
+            } catch (error) {
+                console.error('Error uploading attachment:', error);
+                throw error;
+            }
+        }
+
+        // Mark a message as read
+        async function markMessageAsRead(messageId) {
+            try {
+                // Try to mark via socket first
+                if (socket && socket.connected) {
+                    socket.emit('mark_read', messageId, currentUserId, (response) => {
+                        if (!response.success) {
+                            console.error('Socket mark read failed, falling back to API', response.error);
+                            markMessageAsReadAPI(messageId);
+                        }
+                    });
+                } else {
+                    await markMessageAsReadAPI(messageId);
+                }
+            } catch (error) {
+                console.error('Error marking message as read:', error);
+            }
+        }
+
+        // Mark a message as read via REST API
+        async function markMessageAsReadAPI(messageId) {
+            try {
+                const response = await fetch(`${baseUrl}/messages/${messageId}/read`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to mark message as read');
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error marking message as read via API:', error);
+                throw error;
+            }
+        }
+
+        // Mark all messages from a user as read
+        async function markAllAsRead(userId) {
+            try {
+                const response = await fetch(`${baseUrl}/messages/${userId}/read-all`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to mark all messages as read');
+                }
+                
+                // Update unread count
+                loadUnreadCount();
+                // Update conversations list
+                loadConversations();
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error marking all messages as read:', error);
+            }
+        }
+
+        // Delete a message
+        async function deleteMessage(messageId) {
+            try {
+                const response = await fetch(`${baseUrl}/messages/${messageId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to delete message');
+                }
+                
+                // Remove message from UI
+                const messageEl = document.getElementById(`message-${messageId}`);
+                if (messageEl) {
+                    messageEl.remove();
+                }
+                
+                // Update conversations list
+                loadConversations();
+                
+                return await response.json();
+            } catch (error) {
+                console.error('Error deleting message:', error);
+                throw error;
+            }
+        }
+
+        // Get unread message count
+        async function loadUnreadCount() {
+            try {
+                const response = await fetch(`${baseUrl}/messages/unread/count`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to get unread count');
+                }
+                
+                const result = await response.json();
+                
+                // Update UI with unread count
+                if (result.count > 0) {
+                    document.title = `(${result.count}) DAMPS Messaging`;
+                } else {
+                    document.title = 'DAMPS Messaging';
+                }
+                
+                return result.count;
+            } catch (error) {
+                console.error('Error getting unread count:', error);
+                return 0;
+            }
+        }
+
+        // Search messages
+        async function searchMessages(term) {
+            try {
+                const response = await fetch(`${baseUrl}/messages/search?q=${encodeURIComponent(term)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${jwtToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to search messages');
+                }
+                
+                const result = await response.json();
+                
+                // Render search results
+                renderSearchResults(result.messages, term);
+                
+                return result;
+            } catch (error) {
+                console.error('Error searching messages:', error);
+                return { messages: [], total: 0 };
+            }
+        }
+
+        // ---------- UI Functions ----------
+
+        // Render conversations list
+        function renderConversations(conversations) {
+            conversationsList.innerHTML = '';
+            
+            if (conversations.length === 0) {
+                conversationsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👤</div>
+                        <h3>No conversations yet</h3>
+                    </div>
+                `;
+                return;
+            }
+            
+            conversations.forEach(conv => {
+                const conversationEl = document.createElement('div');
+                conversationEl.className = 'conversation';
+                conversationEl.dataset.userId = conv.id;
+                
+                if (selectedConversation && selectedConversation.id === conv.id) {
+                    conversationEl.classList.add('active');
+                }
+                
+                // Format the date
+                const date = conv.lastMessage ? new Date(conv.lastMessage.sentAt) : new Date();
+                const timeString = formatMessageTime(date);
+                
+                conversationEl.innerHTML = `
+                    <div class="conversation-avatar">${getInitials(conv.name)}</div>
+                    <div class="conversation-details">
+                        <div class="conversation-header">
+                            <div class="conversation-name">${conv.name}</div>
+                            <div class="conversation-time">${timeString}</div>
+                        </div>
+                        <div class="conversation-preview">
+                            ${conv.lastMessage ? conv.lastMessage.content : 'No messages yet'}
+                        </div>
+                    </div>
+                    ${conv.unreadCount > 0 ? `<div class="conversation-unread">${conv.unreadCount}</div>` : ''}
+                `;
+                
+                conversationEl.addEventListener('click', () => {
+                    // Deselect previous conversation
+                    const prevSelected = conversationsList.querySelector('.conversation.active');
+                    if (prevSelected) {
+                        prevSelected.classList.remove('active');
+                    }
+                    
+                    // Select this conversation
+                    conversationEl.classList.add('active');
+                    selectedConversation = conv;
+                    currentReceiverId = conv.id;
+                    
+                    // Update thread header
+                    threadHeader.innerHTML = `
+                        <div class="conversation-avatar">${getInitials(conv.name)}</div>
+                        <h2>${conv.name}</h2>
+                        ${conv.unreadCount > 0 ? `<div class="conversation-unread">${conv.unreadCount}</div>` : ''}
+                    `;
+                    
+                    // Load messages
+                    loadMessages(conv.id);
+                });
+                
+                conversationsList.appendChild(conversationEl);
+            });
+        }
+
+        // Render messages in thread
+        function renderMessages(messages) {
+            messagesList.innerHTML = '';
+            
+            if (messages.length === 0) {
+                messagesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💬</div>
+                        <h3>No messages yet</h3>
+                        <p>Start the conversation by sending a message.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            messages.forEach(message => {
+                addMessageToUI(message, message.senderId === currentUserId);
+            });
+            
+            // Scroll to bottom
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
+        // Add a single message to the UI
+        function addMessageToUI(message, isSent) {
+            const messageEl = document.createElement('div');
+            messageEl.className = `message ${isSent ? 'sent' : ''}`;
+            messageEl.id = `message-${message.id}`;
+            
+            let attachmentHTML = '';
+            if (message.attachments && message.attachments.length > 0) {
+                attachmentHTML = `
+                    <div class="message-file">
+                        <div class="message-file-icon">📎</div>
+                        <a href="${message.attachments[0]}" target="_blank">Attachment</a>
+                    </div>
+                `;
+            }
+            
+            messageEl.innerHTML = `
+                <div class="message-avatar">${getInitials(isSent ? 'Me' : selectedConversation?.name || '?')}</div>
+                <div class="message-bubble">
+                    ${isSent ? `
+                        <div class="message-actions">
+                            <button class="message-action-btn delete-message" data-message-id="${message.id}">🗑️</button>
+                        </div>
+                    ` : ''}
+                    ${attachmentHTML}
+                    <div class="message-content">${message.content}</div>
+                    <div class="message-time">
+                        ${formatMessageTime(new Date(message.sentAt))}
+                        ${isSent ? `<span class="message-status">${message.isRead ? '✓✓' : '✓'}</span>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners for actions
+            messageEl.querySelectorAll('.delete-message').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const messageId = btn.dataset.messageId;
+                    if (confirm('Are you sure you want to delete this message?')) {
+                        deleteMessage(messageId);
+                    }
+                });
+            });
+            
+            messagesList.appendChild(messageEl);
+            
+            // Scroll to bottom
+            messagesList.scrollTop = messagesList.scrollHeight;
+        }
+
+        // Render search results
+        function renderSearchResults(messages, searchTerm) {
+            conversationsList.innerHTML = '';
+            
+            if (messages.length === 0) {
+                conversationsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <h3>No results found</h3>
+                        <p>No messages matching "${searchTerm}"</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const resultsHeader = document.createElement('div');
+            resultsHeader.className = 'conversation';
+            resultsHeader.style.backgroundColor = 'var(--surface)';
+            resultsHeader.style.fontWeight = 'bold';
+            resultsHeader.textContent = `Search results for "${searchTerm}"`;
+            conversationsList.appendChild(resultsHeader);
+            
+            // Group messages by conversation
+            const messagesByConversation = {};
+            
+            messages.forEach(message => {
+                const partnerId = message.senderId === currentUserId ? message.receiverId : message.senderId;
+                
+                if (!messagesByConversation[partnerId]) {
+                    messagesByConversation[partnerId] = [];
+                }
+                
+                messagesByConversation[partnerId].push(message);
+            });
+            
+            // Create search result items
+            for (const [userId, messages] of Object.entries(messagesByConversation)) {
+                messages.forEach(message => {
+                    const resultEl = document.createElement('div');
+                    resultEl.className = 'conversation';
+                    
+                    // Format the date
+                    const date = new Date(message.sentAt);
+                    const timeString = formatMessageTime(date);
+                    
+                    // Highlight the search term
+                    const highlightedContent = message.content.replace(
+                        new RegExp(searchTerm, 'gi'),
+                        match => `<span style="background-color: yellow;">${match}</span>`
+                    );
+                    
+                    resultEl.innerHTML = `
+                        <div class="conversation-avatar">${message.senderId === currentUserId ? 'Me' : getInitials(userId)}</div>
+                        <div class="conversation-details">
+                            <div class="conversation-header">
+                                <div class="conversation-name">${message.senderId === currentUserId ? 'Me' : userId}</div>
+                                <div class="conversation-time">${timeString}</div>
+                            </div>
+                            <div class="conversation-preview">${highlightedContent}</div>
+                        </div>
+                    `;
+                    
+                    resultEl.addEventListener('click', () => {
+                        // Load the conversation
+                        currentReceiverId = userId;
+                        
+                        // Clear search
+                        searchInput.value = '';
+                        
+                        // Load conversations
+                        loadConversations().then(conversations => {
+                            // Find the conversation
+                            const conv = conversations.find(c => c.id === userId);
+                            if (conv) {
+                                selectedConversation = conv;
+                                
+                                // Update thread header
+                                threadHeader.innerHTML = `
+                                    <div class="conversation-avatar">${getInitials(conv.name)}</div>
+                                    <h2>${conv.name}</h2>
+                                    ${conv.unreadCount > 0 ? `<div class="conversation-unread">${conv.unreadCount}</div>` : ''}
+                                `;
+                                
+                                // Load messages
+                                loadMessages(userId);
+                            }
+                        });
+                    });
+                    
+                    conversationsList.appendChild(resultEl);
+                });
+            }
+        }
+
+        // Clear attachment
+        function clearAttachment() {
+            currentAttachment = null;
+            fileInput.value = '';
+            attachmentPreview.style.display = 'none';
+            attachmentPreview.innerHTML = '';
+        }
+
+        // ---------- Helper Functions ----------
+
+        // Get initials from name
+        function getInitials(name) {
+            if (!name) return '?';
+            
+            return name
+                .split(' ')
+                .map(word => word.charAt(0))
+                .join('')
+                .toUpperCase()
+                .substring(0, 2);
+        }
+
+        // Format message time
+        function formatMessageTime(date) {
+            const now = new Date();
+            const diff = now - date;
+            const oneDay = 24 * 60 * 60 * 1000;
+            
+            // Today: show time
+            if (diff < oneDay && date.getDate() === now.getDate()) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            // Yesterday: show "Yesterday"
+            if (diff < 2 * oneDay && date.getDate() === now.getDate() - 1) {
+                return 'Yesterday';
+            }
+            
+            // Within a week: show day name
+            if (diff < 7 * oneDay) {
+                return date.toLocaleDateString([], { weekday: 'short' });
+            }
+            
+            // Older: show date
+            return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        }
+
+        // Debounce function
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), wait);
+            };
+        }
+
+        console.log('Auth token length:', jwtToken.length, 'First 10 chars:', jwtToken.substring(0, 10));
+    </script>
+</body>
+</html>

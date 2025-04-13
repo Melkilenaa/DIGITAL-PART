@@ -1,4 +1,4 @@
-# @baseUrl = http://localhost:3003/api
+# @baseUrl = http://localhost:3000/api
 # @contentType = application/json
 # @vendorToken = {{vendorLogin.response.body.data.token}}
 # @driverToken = {{driverLogin.response.body.data.token}}
