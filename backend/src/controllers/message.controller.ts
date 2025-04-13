@@ -183,13 +183,23 @@ export class MessageController {
         return;
       }
       
+      // Check if a file was uploaded
       if (!req.file) {
         res.status(400).json({ error: 'No file uploaded' });
         return;
       }
 
+      // The file has already been uploaded to Cloudinary by the middleware
+      // The Cloudinary URL is available in req.file.path
+      const cloudinaryUrl = req.file.path;
+      
+      // Store the Cloudinary URL as the file path
       const filePath = await messageService.saveAttachment(req.file, userId);
-      res.status(201).json({ filePath });
+      
+      res.status(201).json({ 
+        filePath,
+        message: 'File uploaded successfully to Cloudinary'
+      });
     } catch (error) {
       console.error('Error uploading attachment:', error);
       res.status(500).json({ error: 'Failed to upload attachment' });
@@ -200,37 +210,37 @@ export class MessageController {
    * Delete a message
    * @route DELETE /api/messages/:messageId
    */
-  async deleteMessage(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = req.user?.userId;
-      const messageId = req.params.messageId;
+  // async deleteMessage(req: Request, res: Response): Promise<void> {
+  //   try {
+  //     const userId = req.user?.userId;
+  //     const messageId = req.params.messageId;
       
-      if (!userId) {
-        res.status(401).json({ error: 'Unauthorized' });
-        return;
-      }
+  //     if (!userId) {
+  //       res.status(401).json({ error: 'Unauthorized' });
+  //       return;
+  //     }
       
-      if (!messageId) {
-        res.status(400).json({ error: 'Message ID is required' });
-        return;
-      }
+  //     if (!messageId) {
+  //       res.status(400).json({ error: 'Message ID is required' });
+  //       return;
+  //     }
 
-      await messageService.deleteMessage(messageId, userId);
-      res.status(200).json({ 
-        message: 'Message deleted successfully' 
-      });
-    } catch (error) {
-      console.error('Error deleting message:', error);
+  //     await messageService.deleteMessage(messageId, userId);
+  //     res.status(200).json({ 
+  //       message: 'Message deleted successfully' 
+  //     });
+  //   } catch (error) {
+  //     console.error('Error deleting message:', error);
       
-      if (error instanceof NotFoundException) {
-        res.status(404).json({ error: error.message });
-      } else if (error instanceof UnauthorizedException) {
-        res.status(403).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: 'Failed to delete message' });
-      }
-    }
-  }
+  //     if (error instanceof NotFoundException) {
+  //       res.status(404).json({ error: error.message });
+  //     } else if (error instanceof UnauthorizedException) {
+  //       res.status(403).json({ error: error.message });
+  //     } else {
+  //       res.status(500).json({ error: 'Failed to delete message' });
+  //     }
+  //   }
+  // }
 
   /**
    * Get unread message count for current user

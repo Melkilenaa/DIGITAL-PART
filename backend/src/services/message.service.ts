@@ -2,6 +2,7 @@ import { PrismaClient, Message, User, UserRole } from '@prisma/client';
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import { NotFoundException, BadRequestException, UnauthorizedException } from '../utils/exceptions.util';
 import notificationService from './notification.service';
+import { uploadToCloudinary } from '../utils/cloudinary.util';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
@@ -51,14 +52,9 @@ export class MessageService {
   private prisma: PrismaClient;
   private io: SocketIOServer | null = null;
   private connectedUsers: Map<string, string[]> = new Map(); // userId -> socketIds[]
-  private uploadDir: string;
   
   constructor() {
     this.prisma = new PrismaClient();
-    this.uploadDir = process.env.MESSAGE_ATTACHMENTS_DIR || path.join(process.cwd(), 'uploads', 'messages');
-    
-    // Ensure upload directory exists
-    this.ensureUploadDirExists();
   }
   
   /**
@@ -145,19 +141,6 @@ export class MessageService {
         }
       });
     });
-  }
-  
-  /**
-   * Ensure upload directory exists
-   */
-  private ensureUploadDirExists(): void {
-    try {
-      if (!fs.existsSync(this.uploadDir)) {
-        fs.mkdirSync(this.uploadDir, { recursive: true });
-      }
-    } catch (error) {
-      console.error('Failed to create upload directory:', error);
-    }
   }
   
   /**
@@ -438,58 +421,46 @@ export class MessageService {
   }
   
   /**
-   * Handle file upload for message attachments
+   * Handle file upload for message attachments using Cloudinary
    */
   async saveAttachment(file: Express.Multer.File, senderId: string): Promise<string> {
     try {
-      // Generate unique filename
-      const fileExtension = path.extname(file.originalname);
-      const randomId = crypto.randomBytes(16).toString('hex');
-      const timestamp = Date.now();
-      const newFilename = `${senderId}_${timestamp}_${randomId}${fileExtension}`;
-      
-      // Define file path
-      const filePath = path.join(this.uploadDir, newFilename);
-      
-      // Save file
-      const writeFile = util.promisify(fs.writeFile);
-      await writeFile(filePath, file.buffer);
-      
-      // Return relative path to be stored in the message
-      return `/uploads/messages/${newFilename}`;
+      // Upload to Cloudinary
+      const cloudinaryUrl = await uploadToCloudinary(file);
+      return cloudinaryUrl;
     } catch (error) {
-      console.error('Failed to save attachment:', error);
-      throw new Error('Failed to save attachment');
+      console.error('Failed to save attachment to Cloudinary:', error);
+      throw new Error('Failed to upload attachment');
     }
   }
   
   /**
    * Delete a message (soft delete)
    */
-  async deleteMessage(messageId: string, userId: string): Promise<void> {
-    const message = await this.prisma.message.findUnique({
-      where: { id: messageId }
-    });
+  // async deleteMessage(messageId: string, userId: string): Promise<void> {
+  //   const message = await this.prisma.message.findUnique({
+  //     where: { id: messageId }
+  //   });
     
-    if (!message) {
-      throw new NotFoundException('Message not found');
-    }
+  //   if (!message) {
+  //     throw new NotFoundException('Message not found');
+  //   }
     
-    // Ensure user is either sender or receiver
-    if (message.senderId !== userId && message.receiverId !== userId) {
-      throw new UnauthorizedException('You can only delete messages you sent or received');
-    }
+  //   // Ensure user is either sender or receiver
+  //   if (message.senderId !== userId && message.receiverId !== userId) {
+  //     throw new UnauthorizedException('You can only delete messages you sent or received');
+  //   }
     
-    // For a real implementation, you should retain messages in the database
-    // and add a "deletedFor" field to track which users have deleted it
-    // For now, we'll just delete it outright
-    await this.prisma.message.delete({
-      where: { id: messageId }
-    });
+  //   // For a real implementation, you should retain messages in the database
+  //   // and add a "deletedFor" field to track which users have deleted it
+  //   // For now, we'll just delete it outright
+  //   await this.prisma.message.delete({
+  //     where: { id: messageId }
+  //   });
     
-    // Emit deletion to both users
-    this.emitMessageDeleted(message);
-  }
+  //   // Emit deletion to both users
+  //   this.emitMessageDeleted(message);
+  // }
   
   /**
    * Get unread message count for a user
