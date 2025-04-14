@@ -1,159 +1,159 @@
-@baseUrl = http://localhost:3000/api
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiI0YzlhMDBlMC1lNmUzLTQzZGUtOGI0ZS03NGI4ZTg2NDljYTgiLCJpYXQiOjE3NDQzNzgzNTIsImV4cCI6MTc0NDM4MTk1Mn0.LgdVYHCXAF7ULDBymfhM8FRoTuwuBnqHAldJwzrAPWM
+# @baseUrl = http://localhost:3000/api
+# @authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJkZmU4ZWRlMi0zMjgwLTRiZGEtYmU1ZS1iZjY3YTc0YzcwOTEiLCJyb2xlIjoiQ1VTVE9NRVIiLCJzZXNzaW9uSWQiOiI0YzlhMDBlMC1lNmUzLTQzZGUtOGI0ZS03NGI4ZTg2NDljYTgiLCJpYXQiOjE3NDQzNzgzNTIsImV4cCI6MTc0NDM4MTk1Mn0.LgdVYHCXAF7ULDBymfhM8FRoTuwuBnqHAldJwzrAPWM
 
-### Get all notifications with pagination and filtering
-GET {{baseUrl}}/notifications
-?page=1
-&limit=10
-&isRead=false
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Get all notifications with pagination and filtering
+# GET {{baseUrl}}/notifications
+# ?page=1
+# &limit=10
+# &isRead=false
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-### Get notifications of a specific type
-GET {{baseUrl}}/notifications?type=ORDER_STATUS
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Get notifications of a specific type
+# GET {{baseUrl}}/notifications?type=ORDER_STATUS
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-### Mark a notification as read
-PUT {{baseUrl}}/notifications/notificationId123/read
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Mark a notification as read
+# PUT {{baseUrl}}/notifications/notificationId123/read
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-### Mark all notifications as read
-PUT {{baseUrl}}/notifications/read-all
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Mark all notifications as read
+# PUT {{baseUrl}}/notifications/read-all
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-### Get unread notification count
-GET {{baseUrl}}/notifications/unread-count
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Get unread notification count
+# GET {{baseUrl}}/notifications/unread-count
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-### Get notification preferences
-GET {{baseUrl}}/notifications/preferences
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Get notification preferences
+# GET {{baseUrl}}/notifications/preferences
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-### Update notification preferences
-PUT {{baseUrl}}/notifications/preferences
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Update notification preferences
+# PUT {{baseUrl}}/notifications/preferences
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-{
-  "orderUpdates": true,
-  "deliveryUpdates": true,
-  "messageReceipts": true,
-  "paymentNotifications": true,
-  "promotions": false,
-  "emailEnabled": true,
-  "pushEnabled": true,
-  "inAppEnabled": true
-}
+# {
+#   "orderUpdates": true,
+#   "deliveryUpdates": true,
+#   "messageReceipts": true,
+#   "paymentNotifications": true,
+#   "promotions": false,
+#   "emailEnabled": true,
+#   "pushEnabled": true,
+#   "inAppEnabled": true
+# }
 
-### Register device for push notifications - iOS
-POST {{baseUrl}}/notifications/devices
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Register device for push notifications - iOS
+# POST {{baseUrl}}/notifications/devices
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-{
-  "deviceToken": "your-device-token-from-apns",
-  "platform": "ios"
-}
+# {
+#   "deviceToken": "your-device-token-from-apns",
+#   "platform": "ios"
+# }
 
-### Register device for push notifications - Android
-POST {{baseUrl}}/notifications/devices
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Register device for push notifications - Android
+# POST {{baseUrl}}/notifications/devices
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-{
-  "deviceToken": "your-device-token-from-fcm",
-  "platform": "android"
-}
+# {
+#   "deviceToken": "your-device-token-from-fcm",
+#   "platform": "android"
+# }
 
-### Unregister device from push notifications
-DELETE {{baseUrl}}/notifications/devices/your-device-token-here
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Unregister device from push notifications
+# DELETE {{baseUrl}}/notifications/devices/your-device-token-here
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-### Test sending a notification (Development only)
-POST {{baseUrl}}/notifications/test
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Test sending a notification (Development only)
+# POST {{baseUrl}}/notifications/test
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-{
-  "title": "Test Notification",
-  "message": "This is a test notification",
-  "type": "SYSTEM",
-  "channels": ["IN_APP", "PUSH"],
-  "data": {
-    "testKey": "testValue",
-    "timestamp": "2025-04-11T10:00:00Z"
-  }
-}
+# {
+#   "title": "Test Notification",
+#   "message": "This is a test notification",
+#   "type": "SYSTEM",
+#   "channels": ["IN_APP", "PUSH"],
+#   "data": {
+#     "testKey": "testValue",
+#     "timestamp": "2025-04-11T10:00:00Z"
+#   }
+# }
 
-### Test order status notification
-POST {{baseUrl}}/notifications/test
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Test order status notification
+# POST {{baseUrl}}/notifications/test
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-{
-  "title": "Order Status Update",
-  "message": "Your order #12345 has been confirmed",
-  "type": "ORDER_STATUS",
-  "referenceId": "order123",
-  "referenceType": "Order",
-  "data": {
-    "orderNumber": "12345",
-    "status": "CONFIRMED",
-    "total": 125.99,
-    "items": [
-      {
-        "name": "Brake Pads",
-        "quantity": 1,
-        "price": 45.99
-      },
-      {
-        "name": "Oil Filter",
-        "quantity": 2,
-        "price": 39.99
-      }
-    ]
-  }
-}
+# {
+#   "title": "Order Status Update",
+#   "message": "Your order #12345 has been confirmed",
+#   "type": "ORDER_STATUS",
+#   "referenceId": "order123",
+#   "referenceType": "Order",
+#   "data": {
+#     "orderNumber": "12345",
+#     "status": "CONFIRMED",
+#     "total": 125.99,
+#     "items": [
+#       {
+#         "name": "Brake Pads",
+#         "quantity": 1,
+#         "price": 45.99
+#       },
+#       {
+#         "name": "Oil Filter",
+#         "quantity": 2,
+#         "price": 39.99
+#       }
+#     ]
+#   }
+# }
 
-### Test delivery notification
-POST {{baseUrl}}/notifications/test
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Test delivery notification
+# POST {{baseUrl}}/notifications/test
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-{
-  "title": "Delivery Update",
-  "message": "Your order is out for delivery",
-  "type": "DELIVERY",
-  "referenceId": "delivery123",
-  "referenceType": "Delivery",
-  "data": {
-    "orderNumber": "12345",
-    "status": "IN_TRANSIT",
-    "estimatedDelivery": "2025-04-11T16:00:00Z",
-    "driverName": "John Driver"
-  }
-}
+# {
+#   "title": "Delivery Update",
+#   "message": "Your order is out for delivery",
+#   "type": "DELIVERY",
+#   "referenceId": "delivery123",
+#   "referenceType": "Delivery",
+#   "data": {
+#     "orderNumber": "12345",
+#     "status": "IN_TRANSIT",
+#     "estimatedDelivery": "2025-04-11T16:00:00Z",
+#     "driverName": "John Driver"
+#   }
+# }
 
-### Test payment notification
-POST {{baseUrl}}/notifications/test
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+# ### Test payment notification
+# POST {{baseUrl}}/notifications/test
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
 
-{
-  "title": "Payment Successful",
-  "message": "Your payment of $125.99 has been processed successfully",
-  "type": "PAYMENT",
-  "referenceId": "payment123",
-  "referenceType": "Payment",
-  "data": {
-    "amount": 125.99,
-    "status": "SUCCESSFUL",
-    "referenceNumber": "PAY12345"
-  }
-}
+# {
+#   "title": "Payment Successful",
+#   "message": "Your payment of $125.99 has been processed successfully",
+#   "type": "PAYMENT",
+#   "referenceId": "payment123",
+#   "referenceType": "Payment",
+#   "data": {
+#     "amount": 125.99,
+#     "status": "SUCCESSFUL",
+#     "referenceNumber": "PAY12345"
+#   }
+# }
